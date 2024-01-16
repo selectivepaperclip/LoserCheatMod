@@ -4,20 +4,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
+using BepInEx.Logging;
 using BepInEx.Configuration;
 using HarmonyLib;
 using LoserCheatMod;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[BepInPlugin("cheatmod.loser", "noxtek & xeph555 cheats - lolkekeke2 edit", "0.10.02")]
+[BepInPlugin("cheatmod.loser", "noxtek & xeph555 cheats - lolkekeke2 edit", "0.10.02.1")]
 public class Mods : BaseUnityPlugin
 {
     private readonly Harmony harmony = new Harmony("cheatmod.loser");
 
+    internal static ManualLogSource Log;
+
     public void Awake()
     {
-
+        Mods.Log = base.Logger;
         this.harmony.PatchAll();
 
         toggleInfStats = Config.Bind("Toggles",                                                         // The section under which the option is shown
@@ -52,6 +55,10 @@ public class Mods : BaseUnityPlugin
                                    "ToggleInfActions",
                                    false,
                                    "Toggle if actions like watching TV, working, social media etc. should have no limits");
+        toggleHotbarChecksCanSearchInventory = Config.Bind("Toggles",
+                                   "ToggleHotbarChecksCanSearchInventory",
+                                   false,
+                                   "Toggle if checks that require topics/items from the hotbar can check the inventory too");
 
 
         timeMultiplier = Config.Bind("Time",
@@ -214,6 +221,7 @@ public class Mods : BaseUnityPlugin
     private ConfigEntry<bool> toggleInfTopics;
     private ConfigEntry<bool> toggleKeepPermTopic;
     private ConfigEntry<bool> toggleInfActions;
+    private ConfigEntry<bool> toggleHotbarChecksCanSearchInventory;
 
     private Dictionary<int, topics> convoLocationOfPermTopic = new Dictionary<int, topics>();
 
@@ -231,6 +239,11 @@ public class Mods : BaseUnityPlugin
     public bool IsKeepPermTopics()
     {
         return toggleKeepPermTopic.Value;
+    }
+
+    public bool IsHotbarChecksCanSearchInventory()
+    {
+        return toggleHotbarChecksCanSearchInventory.Value;
     }
 
     public int getPlayerXpMultiplier()
@@ -341,6 +354,7 @@ public class Mods : BaseUnityPlugin
 
     public void ToggleInfActions() => this.toggleInfActions.Value = !this.toggleInfActions.Value;
 
+    public void ToggleHotbarChecksCanSearchInventory() => this.toggleHotbarChecksCanSearchInventory.Value = !this.toggleHotbarChecksCanSearchInventory.Value;
 
     private void AddSecondarySkills()
     {
@@ -724,7 +738,9 @@ public class Mods : BaseUnityPlugin
             if (GUI.Button(Draw.BtnRight12(btnRow), this.toggleInfActions.Value.ToString(), Draw.BtnStyle))
                 this.ToggleInfActions();
 
-          
+            GUI.Label(Draw.LabelShortest(++btnRow), "Hotbar checks can search inventory too", Draw.BtnStyle);
+            if (GUI.Button(Draw.BtnRight12Shortest(btnRow), this.toggleHotbarChecksCanSearchInventory.Value.ToString(), Draw.BtnStyle))
+                this.ToggleHotbarChecksCanSearchInventory();
 
             Mods.PageLines[0] = btnRow;
         }
