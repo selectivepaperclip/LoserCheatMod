@@ -185,9 +185,9 @@ public class Mods : BaseUnityPlugin
     public void SetCharacterFlag(character_Script character, CharFlagList flag, bool value, bool silent = false)
     {
         // massaged flag doesnt play nice with CSM.modify()
-        if (CharFlagList.Massaged == flag && character.massaged && !value)
+        if (CharFlagList.Massaged == flag && character.CharacterStats["Massaged"].Value == 1 && !value)
         {
-            character.massaged = value;
+            character.CharacterStats["Massaged"].Value = value ? 1 : 0;
         }
         else
         {
