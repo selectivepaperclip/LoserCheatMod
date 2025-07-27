@@ -219,7 +219,7 @@ public class Mods : BaseUnityPlugin
         //gamemanager.ins.updateCharacters(); not needed anymore
     }
 
-    public void GainTopic(topics topic) => player.ins.enqueueMultiGainItemToStash(topic, 1);
+    public void GainTopic(topics topic) => Inventory.ins.gainTopic(topic.ID);
 
     public void GetRandomTempTopicWithTag(dictionary_Tag tag)
     {
