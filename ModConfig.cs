@@ -50,7 +50,9 @@ namespace LoserCheatMod
         public void ToggleInfiniteCleanliness() => GetConfigEntry("ToggleInfiniteCleanliness", toggleConfigs).Value = !IsToggleInfiniteCleanliness();
         public void ToggleInfiniteTopics() => GetConfigEntry("ToggleInfiniteTopics", toggleConfigs).Value = !IsToggleInfiniteTopics();
         public void ToggleInfiniteActions() => GetConfigEntry("ToggleInfiniteActions", toggleConfigs).Value = !IsToggleInfiniteActions();
+        public void ToggleHotbarChecksCanSearchInventory() => GetConfigEntry("ToggleHotbarChecksCanSearchInventory", toggleConfigs).Value = !IsToggleHotbarChecksCanSearchInventory();
         public void ToggleShowOpenModHint() => GetConfigEntry("ToggleShowOpenModHint", toggleConfigs).Value = !IsToggleShowOpenModHint();
+
 
         public bool IsToggleInfiniteStats() => GetConfigEntry("ToggleInfiniteStats", toggleConfigs).Value;
         public bool IsToggleInfiniteArousal() => GetConfigEntry("ToggleInfiniteArousal", toggleConfigs).Value;
@@ -58,6 +60,8 @@ namespace LoserCheatMod
         public bool IsToggleInfiniteCleanliness() => GetConfigEntry("ToggleInfiniteCleanliness", toggleConfigs).Value;
         public bool IsToggleInfiniteTopics() => GetConfigEntry("ToggleInfiniteTopics", toggleConfigs).Value;
         public bool IsToggleInfiniteActions() => GetConfigEntry("ToggleInfiniteActions", toggleConfigs).Value;
+        public bool IsToggleHotbarChecksCanSearchInventory() => GetConfigEntry("ToggleHotbarChecksCanSearchInventory", toggleConfigs).Value;
+
         public bool IsToggleShowOpenModHint() => GetConfigEntry("ToggleShowOpenModHint", toggleConfigs).Value;
 
         public KeyCode GetMaxPlayerStatsKey() => GetConfigEntry("MaxPlayerStatsKey", keyConfigs).Value;
@@ -88,6 +92,7 @@ namespace LoserCheatMod
                 config.Bind("Toggles", "ToggleInfiniteCleanliness", false, "Keeps all room at 100% clean"),
                 config.Bind("Toggles", "ToggleInfiniteTopics", false, "Sets the limit of topics in invetory to 99999"),
                 config.Bind("Toggles", "ToggleInfiniteActions", false, "Toggle if actions like watching TV, working, social media etc. should have no limits"),
+                config.Bind("Toggles", "ToggleHotbarChecksCanSearchInventory", false, "Toggle whether actions that require certain items/topics are allowed to search inventory (items/topics not in hotbar wont be consumed)"),
                 config.Bind("Toggles", "ToggleShowOpenModHint", true, "Toggle if 'press ShowModsKey to open' is displayed, when mod is closed"),
             ];
 
