@@ -1,465 +1,278 @@
 ﻿
+using BepInEx;
+using HarmonyLib;
+using LoserCheatMod;
+using Sirenix.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using BepInEx;
-using BepInEx.Logging;
-using BepInEx.Configuration;
-using HarmonyLib;
-using LoserCheatMod;
+using System.Reflection;
+using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.SceneManagement;
 
-[BepInPlugin("cheatmod.loser", "noxtek & xeph555 cheats - lolkekeke2 edit", "0.10.02.1")]
+[BepInPlugin(NAMESPACE, TITLE, VERSION)]
 public class Mods : BaseUnityPlugin
 {
-    private readonly Harmony harmony = new Harmony("cheatmod.loser");
+    public const string NAMESPACE = "LoserCheatmod";
+    public const string TITLE = "noxtek & xeph555 cheats - lolkekeke2 edit";
+    public const string VERSION = "0.11.00";
 
-    internal static ManualLogSource Log;
-
+    // entry point, called once from Unity due to BaseUnityPlugin (MonoBehaviour)
+    // Mind the split between awake and start, awake should only handle instance creation and gameObject relevant stuff
     public void Awake()
     {
-        Mods.Log = base.Logger;
-        this.harmony.PatchAll();
+        Instance = this;
+        DontDestroyOnLoad(Instance);
+        gameObject.AddComponent<ModsGUI>();
 
-        toggleInfStats = Config.Bind("Toggles",                                                         // The section under which the option is shown
-                                    "ToggleInfiniteStats",                                              // The key of the configuration option in the configuration file
-                                    false,                                                              // The default value
-                                    "Toggles infinite stats (focus, stamina, health set to max)");      // Description of the option to show in the config file
-        toggleInfArousal = Config.Bind("Toggles",
-                                    "ToggleInfiniteArousal",
-                                    false,
-                                    "Sets arousal to half of max");
-        toggleResetLifestyleCD = Config.Bind("Toggles",
-                                    "ToggleResetLifestyleCD",
-                                    false,
-                                    "Removes the cooldown of changing lifestyles");
-        toggleInfCleanliness = Config.Bind("Toggles",
-                                    "ToggleInfCleanliness",
-                                    false,
-                                    "Keeps all room at 100% clean");
-        toggleSkipTimeReloadLocation = Config.Bind("Toggles",
-                                    "ToggleSkipTimeReloadLocation",
-                                    true,
-                                    "Recalculates character locations and schedules after skipping time");
-        toggleInfTopics = Config.Bind("Toggles",
-                                    "ToggleInfTopics",
-                                    false,
-                                    "Sets the limit of topics in invetory to 99999");
-        toggleKeepPermTopic = Config.Bind("Toggles",
-                                    "ToggleKeepPermTopic",
-                                    false,
-                                    "Toggle if permanent topics should be removed from hotbar when used in conversations");
-        toggleInfActions = Config.Bind("Toggles",
-                                   "ToggleInfActions",
-                                   false,
-                                   "Toggle if actions like watching TV, working, social media etc. should have no limits");
-        toggleHotbarChecksCanSearchInventory = Config.Bind("Toggles",
-                                   "ToggleHotbarChecksCanSearchInventory",
-                                   false,
-                                   "Toggle if checks that require topics/items from the hotbar can check the inventory too");
-
-
-        timeMultiplier = Config.Bind("Time",
-                                    "TimeMultiplier",
-                                    1,
-                                    new ConfigDescription("Multiplier to time, speeds up scene transitions, attribute gains, topics/item received splash etc. Hold CTRL for 5 * multiplier",
-                                    new AcceptableValueRange<int>(1, 10)));
-
-        playerXpMultiplier = Config.Bind("Gameplay",
-                                   "PlayerXpMultiplier",
-                                   1,
-                                   new ConfigDescription("Multiplier to skill xp gained for player",
-                                   new AcceptableValueRange<int>(1, 30)));
-        npcXpMultiplier = Config.Bind("Gameplay",
-                                  "NpcXpMultiplier",
-                                  1,
-                                  new ConfigDescription("Multiplier to skill xp gained for NPCs",
-                                  new AcceptableValueRange<int>(1, 10)));
-
-        modShowKey = Config.Bind("Key",
-                                    "ShowMod",
-                                    KeyCode.C,
-                                    "Shortcut key for showing or hiding the mod");
-        maxCharactersKey = Config.Bind("Key",
-                                   "MaxCharacterValues",
-                                   KeyCode.M,
-                                   "Shortcut key for maxing all non player character's stats and interests");
-        fastForwardKey = Config.Bind("Key",
-                                    "FastForward",
-                                    KeyCode.LeftControl,
-                                    "Shortcut key for 5x time multiplier when held");
-
-        timeMinusKey = Config.Bind("Key",
-                                    "TimeMinus",
-                                    KeyCode.Q,
-                                    "Moves time back 1 hour. Cannot go backwards in days");
-        timePlusKey = Config.Bind("Key",
-                                    "TimePlus",
-                                    KeyCode.W,
-                                    "Moves time forward 1 hour. If past midnight, rolls over to next day");
-        skip24HoursKey = Config.Bind("Key",
-                                    "Skip24Hours",
-                                    KeyCode.E,
-                                    "Skips 24 hours");
-
-        page1Key = Config.Bind("Key",
-                            "Page1",
-                            KeyCode.Alpha1,
-                            "Goes to page 1");
-        page2Key = Config.Bind("Key",
-                            "Page2",
-                            KeyCode.Alpha2,
-                            "Goes to page 2");
-
-        resetActionsKey = Config.Bind("Key",
-                                    "ResetActions",
-                                    KeyCode.R,
-                                    "Resets actions like watching TV or working");
-
-        toggleInfStatsKey = Config.Bind("Key",
-                                    "ToggleInfiniteStatsKey",
-                                    KeyCode.F2,
-                                    "Shortcut key for ToggleInfiniteStats");
-        toggleInfArousalKey = Config.Bind("Key",
-                                    "ToggleInfiniteArousal",
-                                    KeyCode.F3,
-                                    "Shortcut key for ToggleInfiniteArousal");
-        toggleResetLifestyleCDKey = Config.Bind("Key",
-                                    "ToggleResetLifestyleCD",
-                                    KeyCode.F4,
-                                    "Shortcut key for ToggleResetLifestyleCD");
-        toggleSkipTimeReloadLocationKey = Config.Bind("Key",
-                                    "ToggleSkipTimeReloadLocation",
-                                     KeyCode.F5,
-                                    "Shortcut key for ToggleSkipTimeReloadLocation");
-        toggleInfCleanlinessKey = Config.Bind("Key",
-                                    "ToggleInfCleanliness",
-                                    KeyCode.F6,
-                                    "Shortcut key for ToggleInfCleanliness");
-        toggleInfTopicsKey = Config.Bind("Key",
-                                    "ToggleInfTopics",
-                                    KeyCode.F7,
-                                    "Shortcut key for ToggleInfTopics");
-        toggleKeepPermTopicKey = Config.Bind("Key",
-                            "ToggleKeepPermTopic",
-                            KeyCode.F8,
-                            "Shortcut key for ToggleKeepPermTopic");
-        toggleInfActionsKey = Config.Bind("Key",
-                            "ToggleInfiniteActions",
-                            KeyCode.F9,
-                            "Shortcut key for ToggleInfiniteActions");
-
-    }
-
-    [HarmonyPatch(typeof(gamemanager), "Start")]
-    private class gamemanager_cheatmod
-    {
-        [HarmonyPostfix]
-        private static void Postfix() => Mods.CreateInstance();
-    }
-
-    public static void CreateInstance()
-    {
-        Mods mods = Object.FindObjectOfType<Mods>();
-        if (Object.Equals((Object)mods, (Object)null))
-            mods = new GameObject(nameof(Mods)).AddComponent<Mods>();
-        Object.DontDestroyOnLoad((Object)mods);
-        Mods.Instance = mods;
-        player.ins.playerSkills.Skills.Sort((s1, s2) => s1.Moniker.CompareTo(s2.Moniker));
-        Inventory.ins.TagsList.Sort((t1, t2) => t1.associated_TAG.name.CompareTo(t2.associated_TAG.name));
-        Inventory.ins.Master_TopicList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+        var harmony = new Harmony(NAMESPACE);
+        harmony.PatchAll();
     }
 
     public static Mods Instance;
-    private bool modShow;
+    private Mods() { }
 
-    private ConfigEntry<KeyCode> modShowKey;
-
-    private ConfigEntry<KeyCode> page1Key;
-    private ConfigEntry<KeyCode> page2Key;
-
-    private ConfigEntry<KeyCode> toggleInfStatsKey;
-    private ConfigEntry<KeyCode> toggleInfArousalKey;
-    private ConfigEntry<KeyCode> toggleResetLifestyleCDKey;
-    private ConfigEntry<KeyCode> toggleInfCleanlinessKey;
-    private ConfigEntry<KeyCode> toggleSkipTimeReloadLocationKey;
-    private ConfigEntry<KeyCode> toggleInfTopicsKey;
-    private ConfigEntry<KeyCode> toggleKeepPermTopicKey;
-    private ConfigEntry<KeyCode> toggleInfActionsKey;
-
-    private ConfigEntry<KeyCode> maxCharactersKey;
-
-    private ConfigEntry<KeyCode> fastForwardKey;
-
-    private ConfigEntry<KeyCode> resetActionsKey;
-
-    private int playerSkillSelected;
-
-    private ConfigEntry<int> playerXpMultiplier;
-    private ConfigEntry<int> npcXpMultiplier;
-
+    public const int FastForwardMultiplier = 5;
     private bool fastForwardHeld;
-    private ConfigEntry<KeyCode> timeMinusKey;
-    private ConfigEntry<KeyCode> timePlusKey;
-    private ConfigEntry<KeyCode> skip24HoursKey;
-    private ConfigEntry<int> timeMultiplier;
 
-    private int topicSelected;
-    private int tagSelected;
 
-    private int characterSelected;
-    private int characterATSelected = -1;
-    private int characterSkillSelected;
-
-    private ConfigEntry<bool> toggleInfStats;
-    private ConfigEntry<bool> toggleInfArousal;
-    private ConfigEntry<bool> toggleResetLifestyleCD;
-    private ConfigEntry<bool> toggleInfCleanliness;
-    private ConfigEntry<bool> toggleSkipTimeReloadLocation;
-    private ConfigEntry<bool> toggleInfTopics;
-    private ConfigEntry<bool> toggleKeepPermTopic;
-    private ConfigEntry<bool> toggleInfActions;
-    private ConfigEntry<bool> toggleHotbarChecksCanSearchInventory;
-
-    private Dictionary<int, topics> convoLocationOfPermTopic = new Dictionary<int, topics>();
-
-    string playerSkillFilter = "";
-    string characterTopicFilter = "";
-
-    string topicsFilter = "";
-    string tagsFilter = "";
-
-    public bool IsInfiniteTopics()
+    // Start is called once from Unity before first frame and after all awakes are handled, due to BaseUnityPlugin (MonoBehaviour),
+    private void Start()
     {
-        return toggleInfTopics.Value;
+        ModConfig.Instance.ConfigBindings(Instance.Config);
     }
 
-    public bool IsKeepPermTopics()
-    {
-        return toggleKeepPermTopic.Value;
-    }
-
-    public bool IsHotbarChecksCanSearchInventory()
-    {
-        return toggleHotbarChecksCanSearchInventory.Value;
-    }
-
-    public int getPlayerXpMultiplier()
-    {
-        return playerXpMultiplier.Value;
-    }
-    public int getNPCXpMultiplier()
-    {
-        return npcXpMultiplier.Value;
-    }
-
+    // Update is called for each frame from Unity due to BaseUnityPlugin (MonoBehaviour)
     private void Update()
     {
-        this.HandleKeys();
-        this.Effects();
+        // modify timescale even if cheatmod is not currently usable
+        fastForwardHeld = Input.GetKey(ModConfig.Instance.GetFastForwardKey());
+        Time.timeScale = fastForwardHeld ? ModConfig.Instance.GetTimeMultiplier() * FastForwardMultiplier : ModConfig.Instance.GetTimeMultiplier();
+
+        if (Instance.CheatModBlocked())
+            return;
+
+        HandleKeys();
+        Effects();
     }
 
-    public void Effects()
+    // handle persistant effects like infinite stats, etc.
+    private void Effects()
     {
-        Time.timeScale = this.fastForwardHeld ? this.timeMultiplier.Value * 5 : this.timeMultiplier.Value;
-        if (this.toggleInfStats.Value)
-        {
-            player.ins.focus = player.ins.getFocusMax();
-            player.ins.health = player.ins.getHealthMax();
-            player.ins.stamina = player.ins.getStaminaMax();
-            player.ins.cleanRate = 10;
-        }
-        if (this.toggleInfArousal.Value)
-            player.ins.arousal = player.ins.getArousalMax() / 2;
-        if (this.toggleResetLifestyleCD.Value)
-            this.ResetLifestyleCD();
-        if (this.toggleInfCleanliness.Value)
-           this. CleanAllRooms();
-        if (this.toggleInfActions.Value)
-            this.ResetActions();
+        if (ModConfig.Instance.IsToggleInfiniteStats())
+            MaxPlayerStats();
+        if (ModConfig.Instance.IsToggleInfiniteArousal())
+            MaxPlayerArousal();
+        if (ModConfig.Instance.IsToggleResetLifestyleCD())
+            ResetLifestyleCD();
+        if (ModConfig.Instance.IsToggleInfiniteCleanliness())
+            CleanAllRooms();
+        if (ModConfig.Instance.IsToggleInfiniteActions())
+            ResetActions();
     }
 
-    public void HandleKeys()
+    // handle all keypresses here
+    private void HandleKeys()
     {
-        if (Input.GetKeyDown(page1Key.Value))
-        {
-            modShow = true;
-            PageCurrent = 0;
-        }
-        if (Input.GetKeyDown(page2Key.Value))
-        {
-            modShow = true;
-            PageCurrent = 1;
-        }
+        if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteStatsKey()))
+            ModConfig.Instance.ToggleInfiniteStats();
+        if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteArousalKey()))
+            ModConfig.Instance.ToggleInfiniteArousal();
+        if (Input.GetKeyDown(ModConfig.Instance.GetToggleResetLifestyleCDKey()))
+            ModConfig.Instance.ToggleResetLifestyleCD();
+        if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteCleanlinessKey()))
+            ModConfig.Instance.ToggleInfiniteCleanliness();
+        if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteTopicsKey()))
+            ModConfig.Instance.ToggleInfiniteTopics();
+        if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteActionsKey()))
+            ModConfig.Instance.ToggleInfiniteActions();
 
-        if (Input.GetKeyDown(modShowKey.Value))
-            this.modShow = !this.modShow;
-        if (Input.GetKeyDown(toggleInfStatsKey.Value))
-            this.ToggleInfiniteStats();
-        if (Input.GetKeyDown(toggleInfArousalKey.Value))
-            this.ToggleInfiniteArousal();
-        if (Input.GetKeyDown(toggleResetLifestyleCDKey.Value))
-            this.ToggleResetLifestyleCD();
-        if (Input.GetKeyDown(toggleSkipTimeReloadLocationKey.Value))
-            this.ToggleSkipTimeReloadLocation();
-        if (Input.GetKeyDown(toggleInfCleanlinessKey.Value))
-            this.ToggleInfCleanliness();
-        if (Input.GetKeyDown(toggleInfTopicsKey.Value))
-            this.ToggleInfTopics();
-        if (Input.GetKeyDown(toggleKeepPermTopicKey.Value))
-            this.ToggleKeepPermTopics();
+        if (Input.GetKeyDown(ModConfig.Instance.GetTimeMinusKey()))
+            SkipHours(-1);
+        if (Input.GetKeyDown(ModConfig.Instance.GetTimePlusKey()))
+            SkipHours(1);
+        if (Input.GetKeyDown(ModConfig.Instance.GetSkip24HoursKey()))
+            SkipHours(24);
 
-        if (Input.GetKeyDown(timeMinusKey.Value))
-            this.SkipHours(-1);
-        if (Input.GetKeyDown(timePlusKey.Value))
-            this.SkipHours(1);
-        if (Input.GetKeyDown(skip24HoursKey.Value))
-            this.SkipHours(24);
-
-        if (Input.GetKeyDown(resetActionsKey.Value))
+        if (Input.GetKeyDown(ModConfig.Instance.GetResetActionsKey()))
         {
-            this.ResetActions();
-            this.SkipHours(0);
+            ResetActions();
+            RefreshButtons();
         }
 
-        this.fastForwardHeld = Input.GetKey(fastForwardKey.Value);
-
-        if (Input.GetKeyDown(maxCharactersKey.Value))
+        if (Input.GetKeyDown(ModConfig.Instance.GetMaxPlayerStatsKey()))
         {
-            this.MaxCharactersExp();
-            this.SetCharacterValues(100);
+            MaxPlayerStats();
+            RefreshButtons();
         }
     }
 
-    private void ToggleInfiniteStats() => this.toggleInfStats.Value = !this.toggleInfStats.Value;
-
-    private void ToggleInfiniteArousal() => this.toggleInfArousal.Value = !this.toggleInfArousal.Value;
-
-    public void ToggleResetLifestyleCD() => this.toggleResetLifestyleCD.Value = !this.toggleResetLifestyleCD.Value;
-
-    public void ToggleSkipTimeReloadLocation() => this.toggleSkipTimeReloadLocation.Value = !this.toggleSkipTimeReloadLocation.Value;
-
-    public void ToggleInfCleanliness() => this.toggleInfCleanliness.Value = !this.toggleInfCleanliness.Value;
-
-    public void ToggleInfTopics() => this.toggleInfTopics.Value = !this.toggleInfTopics.Value;
-
-    public void ToggleKeepPermTopics()
+    public List<Skill> GetPlayerSkills() => player.ins.playerSkills.Skills.OrderBy(skill => skill.Moniker).ToList();
+    public List<dictionary_Tag> GetAllDictionaryTags() => Inventory.ins.TagsList.OrderBy(tag => tag.associated_TAG.name).ToList();
+    public List<topics> GetAllTopics() => Inventory.ins.Master_TopicList.OrderBy(topic => topic.Name).ToList();
+    public List<tags> GetRelevantCharacterSkills(character_Script character)
     {
-       this.toggleKeepPermTopic.Value = !this.toggleKeepPermTopic.Value;
-        if (!this.toggleKeepPermTopic.Value)
-            ClearRememberedPermTopics();
+        // multiple interests have different tags (but we only actually care about the relevant xp)
+        Dictionary<xpSO, tags> tagsByXP = [];
+        foreach (string atName in character.Archtype.possibleATs)
+        {
+            if (atName != "none")
+            {
+                ArcheType at = archetypes.ins.GetArchetypeByName(atName);
+                foreach (interestSO interest in at.interests)
+                    foreach (tags tag in interest.associatedtags)
+                        if (character.preferences[tag.associatedXP.Moniker] != 100)
+                            tagsByXP[tag.associatedXP] = tag;
+            }
+        }
+        // distinct tags
+        return tagsByXP.Values.OrderBy(tag => tag.associatedXP.Moniker).ToList();
     }
 
-    public void ToggleInfActions() => this.toggleInfActions.Value = !this.toggleInfActions.Value;
-
-    public void ToggleHotbarChecksCanSearchInventory() => this.toggleHotbarChecksCanSearchInventory.Value = !this.toggleHotbarChecksCanSearchInventory.Value;
-
-    private void AddSecondarySkills()
+    public void MaxPlayerStats()
     {
-        foreach (Skill skill in player.ins.playerSkills.Skills)
+        AddPlayerFocus(player.ins.getFocusMax());
+        AddPlayerHealth(player.ins.getHealthMax());
+        AddPlayerStamina(player.ins.getStaminaMax());
+    }
+    // set player arousal to below max, as to not end sex minigame instantly
+    public void MaxPlayerArousal() => AddPlayerArousal(player.ins.getArousalMax() - 1 - player.ins.getArousal());
+
+    public void AddPlayerFocus(int amount) => player.ins.addFocus(amount);
+    public void AddPlayerStamina(int amount) => player.ins.addStamina(amount);
+    public void AddPlayerHealth(int amount) => player.ins.addHealth(amount);
+    public void AddPlayerArousal(int amount) => player.ins.addArousal(amount);
+
+    public void AddMoneyToPlayer(int money) => player.ins.addMoney(money);
+
+    public void AddAllPlayerSkills(int amount) => GetPlayerSkills().ForEach(skill => AddPlayerSkill(skill, amount));
+    public void AddPlayerSkill(Skill skill, int amount) => player.ins.playerSkills.gainPassiveXP(skill, amount);
+
+    // limit exp gain to prevent 2 rank ups at once (game logic does not support it)
+    public int ExperienceGainMod(int amount, int modifier) => Mathf.Clamp(amount * modifier, 0, 50);
+
+    public void MaxCharacterExp(character_Script character)
+    {
+        foreach (tags tag in GetRelevantCharacterSkills(character))
+            AddCharacterStat(character, CharStatList.Preference, 999, tag: tag, silent: true);
+    }
+
+    public void AddCharacterStat(character_Script character, CharStatList stat, int amount = 0, tags tag = null, interestSO interest = null, bool silent = false)
+    {
+        CharacterStatModifications CSM = new()
         {
-            player.ins.playerSkills.gainPassiveXP(skill, 100);
+            character = character.Assigned,
+            Stat = stat,
+            Amount = amount
+        };
+        if (interest != null)
+            CSM._String = interest.Moniker;
+        if (tag != null)
+            CSM.tag = tag;
+
+        if (silent)
+            CSM.modifySilent();
+        else
+            CSM.modify();
+
+        if (CharStatList.interest1 == CSM.Stat || CharStatList.interest2 == CSM.Stat)
+            character.updateIntrestedTags();
+    }
+
+    public void SetCharacterFlag(character_Script character, CharFlagList flag, bool value, bool silent = false)
+    {
+        // massaged flag doesnt play nice with CSM.modify()
+        if (CharFlagList.massaged == flag && character.massaged && !value)
+        {
+            character.massaged = value;
+        }
+        else
+        {
+            CharacterStatModifications CSM = new()
+            {
+                character = character.Assigned,
+                Flag = flag,
+                Toggle = value
+            };
+
+            if (silent)
+                CSM.modifySilent();
+            else
+                CSM.modify();
         }
     }
 
-    private void MaxCharactersExp()
+    public void MaxCharacterStats(character_Script character, int value = 99999)
     {
-        foreach (character_Script character in characters.ins.Character_List)
+        AddCharacterStat(character, CharStatList.relationship, value, silent: true);
+        AddCharacterStat(character, CharStatList.lust, value, silent: true);
+        AddCharacterStat(character, CharStatList.interest, value, silent: true);
+        AddCharacterStat(character, CharStatList.intoxication, value, silent: true);
+        AddCharacterStat(character, CharStatList.followers, value, silent: true);
+        // make a dominant character more dominant, and submissive more submissive. 0 is currently treated as submissive
+        AddCharacterStat(character, CharStatList.dominance, character.getStat(CharStatList.dominance) > 0 ? value : -value, silent: true);
+    }
+
+    public void TransformCharacter(character_Script character, string AT)
+    {
+        character.loadedAT = AT;
+        character.ArchetypeTransformation();
+        //gamemanager.ins.updateCharacters(); not needed anymore
+    }
+
+    public void GainTopic(topics topic) => player.ins.gainItem(topic);
+
+    public void GetRandomTempTopicWithTag(dictionary_Tag tag)
+    {
+        List<topics> topics = tag.TopicsWithTag.FindAll(t => t.isTemp());
+        if (topics.IsNullOrEmpty())
+            return;
+        System.Random rnd = new();
+        GainTopic(topics.ElementAt(rnd.Next(0, topics.Count - 1)));
+    }
+
+    public void ResetLifestyleCD() => Enumerable.Range(0, 99).ForEach(n => player.ins.updateLifeStyleCDs());
+
+    public void SkipHours(int hourstoadd)
+    {
+        // if time is 0, and user goes back in time, need to wrap around to previous day
+        // but in game logic, days can only go forward, so we do a bit of trickery
+        if (Scheduler.ins.time == 0 && hourstoadd == -1)
         {
-            character.cheatPreferences();
+            // set the time to the maximum hour of the previous day
+            Scheduler.ins.time = 23;
+            int numberOfDays = Enum.GetValues(Scheduler.ins.weekday.GetType()).Length; // = 7
+            // go back 1 day
+            int previousDay = (Array.IndexOf(Enum.GetValues(Scheduler.ins.weekday.GetType()), Scheduler.ins.weekday) - 1 + numberOfDays) % numberOfDays;
+            Scheduler.ins.weekday = (weekday_list)Enum.GetValues(Scheduler.ins.weekday.GetType()).GetValue(previousDay);
         }
-    }
-
-    private void SetCharacterValues(int value)
-    {
-        foreach (character_Script character in characters.ins.Character_List)
+        // implement going back in time as setting time to time - 2, then going forward 1 hour (game logic doesnt support time going back as actual negative value)
+        else if (hourstoadd == -1)
         {
-            character.followers = 999;
-            character.lust = value;
-            character.relationship = value;
-            character.interest = value;
-            character.intoxication = value;
-            character.dominance = character.dominance > 0 ? value : -value;
+            hourstoadd = 1;
+            Scheduler.ins.time -= 2;
         }
+        // needs to be async (IEnumerator) due to game logic
+        gamemanager.ins.StartEnumeration(SkipHoursDelayed(hourstoadd));
     }
 
-    private void AddMoneyToPlayer(int money) => player.ins.addMoney(money);
-
-    private void ResetLifestyleCD()
-    {
-        player.ins.lifestyleDominanceCD = 0;
-        player.ins.lifestyleHealthyCD = 0;
-        player.ins.lifestyleMoralCD = 0;
-        player.ins.lifestyleOrderCD = 0;
-        player.ins.lifestyleStraightCD = 0;
-        player.ins.lifestyleTidyCD = 0;
-    }
-
-    private void SkipHours(int hourstoadd)
-    {
-        gamemanager.ins.StartEnumeration(Delay(hourstoadd));
-    }
-    private IEnumerator Delay(int hourstoadd)
+    // asked the dev, and this is how time passing should be handled:
+    private IEnumerator SkipHoursDelayed(int hourstoadd)
     {
         Scheduler.ins.TimeAdvancing = true;
         Scheduler.ins.waitingForAdvance();
         yield return new WaitForSeconds(0.1f);
-        Scheduler.ins.advanceTime(hourstoadd);
+        AdvanceTime(hourstoadd);
         while (Scheduler.QueuedScheduleCheck) { yield return null; }
-        if (this.toggleSkipTimeReloadLocation.Value)
-            gamemanager.ins.reloadLoacation(true);
-        else
-            UI_Manager.ins.UpdateUI();
+        RefreshButtons(true);
     }
+    // own method so that IsCalledFromCheatMod can be used
+    private void AdvanceTime(int hourstoadd) => Scheduler.ins.advanceTime(hourstoadd);
 
-    private Array GetPossibleATs(character_Script character)
-    {
-        if (character.Assigned == CharacterList.Becky)
-            return Enum.GetValues(typeof(BeckyATs));
-
-        if (character.Assigned == CharacterList.Charlie)
-            return Enum.GetValues(typeof(CharlieATs));
-
-        if (character.Assigned == CharacterList.Diane)
-            return Enum.GetValues(typeof(DianeATs));
-
-        if (character.Assigned == CharacterList.Gina)
-            return Enum.GetValues(typeof(GinaATs));
-
-        if (character.Assigned == CharacterList.Jay)
-            return Enum.GetValues(typeof(JayATs));
-
-        if (character.Assigned == CharacterList.Jesse)
-            return Enum.GetValues(typeof(JesseATs));
-
-        if (character.Assigned == CharacterList.Lisa)
-            return Enum.GetValues(typeof(LisaATs));
-
-        if (character.Assigned == CharacterList.Morgan)
-            return Enum.GetValues(typeof(MorganATs));
-
-        if (character.Assigned == CharacterList.Richard)
-            return Enum.GetValues(typeof(RichardATs));
-
-        if (character.Assigned == CharacterList.Sally)
-            return Enum.GetValues(typeof(SallyATs));
-
-        if (character.Assigned == CharacterList.Tilley)
-            return Enum.GetValues(typeof(TilleyATs));
-
-        return null;
-    }
-
-    private String GetATToLoad(Array ats, int idx)
-    {
-        if (ats == null || idx < 0 || idx >= ats.Length)
-            return "none";
-        return ats.GetValue(idx).ToString();
-    }
-
-    private bool AddRoomCleanliness(location loc, int amt)
+    public bool AddRoomCleanliness(location loc, int amt = 999)
     {
         if (loc != null && loc.cleanable)
         {
@@ -469,415 +282,151 @@ public class Mods : BaseUnityPlugin
         return false;
     }
 
-    private void CleanAllRooms()
+    public void CleanAllRooms() => gamemanager.ins.LM.locations.Values.ForEach(loc => AddRoomCleanliness(loc));
+
+    public void ResetActions()
     {
-        foreach (location loc in gamemanager.ins.LM.locations.Values)
-            AddRoomCleanliness(loc, 999);
+        ResetPlayerFlags();
+        gamemanager.ins.LM.locations.Values.ForEach(loc => ResetLocation(loc));
+        characters.ins.Character_List.ForEach(character => ResetNpcCharacterFlags(character));
     }
 
-    private void ResetActions()
+    public void ResetPlayerFlags()
     {
-        player.ins.resetVainAction();
-        player.ins.napamount = 0;
-        player.ins.restamount = 0;
-        player.ins.tvAmount = 0;
-        player.ins.resetVideogameToggle();
-        player.ins.resetSnack();
-        player.ins.hasgroomed = false;
-        player.ins.watchedLivestream = false;
-        player.ins.hasWardrobed = false;
-        player.ins.hasResearched = false;
-        player.ins.hasWorkedToday = false;
-        player.ins.hasYardWork = false;
-
-        foreach (location loc in gamemanager.ins.LM.locations.Values)
-        {
-            loc.dailyCD1 = false;
-            loc.dailyCD2 = false;
-            loc.dailyCD3 = false;
-            loc.weeklyCD1 = false;
-            loc.localCount = 0;
-        }
+        player.ins.DailyResets();
+        // remember and restore hasCarKey flag after resetSleep
+        bool hasCarKey = player.ins.getHasCarKey();
+        player.ins.resetSleep();
+        player.ins.setHasCarKey(hasCarKey);
+        // weekly reset
+        player.ins.setHasYardwork(Bool: false);
     }
 
-    private void GetRandomTopicWithTag(dictionary_Tag tag)
+    public void ResetLocation(location loc)
     {
-        List<topics> topics = tag.TopicsWithTag.FindAll(t => t.isTemp());
-        if (topics.IsNullOrEmpty())
-            return;
-        System.Random rnd = new System.Random();
-        player.ins.gainItem(topics.ElementAt(rnd.Next(0, topics.Count - 1)));
+        loc.DailyReset();
+        InvokePrivateMember(loc, "WeeklyReset");
     }
 
-    private string PrintTags(tags[] associatedTags)
+    public void ResetNpcCharacterFlags(character_Script character)
     {
-        return String.Join(", ", associatedTags.Select(t => t.name).ToArray());
+        // character.dailyReset clears too many stats and flags, character.weeklyReset clears hacked profiles
+        //character.DailyReset();
+        //character.WeeklyReset();
+        foreach (CharFlagList flag in GetRelevantCharacterFlags())
+            SetCharacterFlag(character, flag, false, silent: true);
     }
 
-    private void Bailout()
+    public List<CharFlagList> GetRelevantCharacterFlags() => [CharFlagList.hasModeled, CharFlagList.massaged, CharFlagList.hadSex, CharFlagList.dailyFlag1, CharFlagList.dailyFlag2, CharFlagList.Invited];
+
+    // sometimes, due to bugs in the game, a scene might get stuck. added this as an emergency escape to player room
+    public void Bailout()
     {
-        location location = LocationsManager.ins.GetLocation("Your Room");
-        player.ins.setLocation(location.LocaleName);
+        player.ins.setLocation(Location_list.Your_Room);
         Scheduler.ins.Relocating = false;
-        SkipHours(0);
+        RefreshScene();
     }
 
-    public void RememberTopicLocation(int location, topics topic)
+    public List<location> GetLockedLocations()
     {
-        convoLocationOfPermTopic[location] =  topic;
+        // filter out job locations
+        List<location> hiddenLocations = gamemanager.ins.LM.locations.Values.Where(l => l.hiddenLocation && !JobManager.ins.jobs.Select(j => j.AssignedLocation).Contains(l.assignedLocale)).ToList();
+        hiddenLocations.Sort((l1, l2) => l1.LocaleName.CompareTo(l2.LocaleName));
+        return hiddenLocations;
     }
 
-    public void RestorePermTopics()
+    public void UnlockLocation(location loc)
     {
-        foreach (KeyValuePair<int, topics> e in convoLocationOfPermTopic)
-            Inventory.ins.setHotbarTopic_explicit(e.Key, e.Value.ID);
-        ClearRememberedPermTopics();
+        gamemanager.ins.unHideLocation(loc.assignedLocale);
     }
 
-    public void ClearRememberedPermTopics()
+    public void RefreshButtons(bool fadeToBlack = false)
     {
-        this.convoLocationOfPermTopic.Clear();
+        if (CanRefreshScene())
+            gamemanager.ins.reloadLoacation(fadeToBlack);
+    }
+    public void RefreshScene()
+    {
+        if (CanRefreshScene())
+            SkipHours(0);
     }
 
-    // ------------------------------------------------------------------------
-
-    public static int PageCurrent;
-    public static int PageTotal;
-    public static int[] PageLines;
-    public static Rect ModWindowPos;
-    public static float ModWindowWidht;
-
-    private void OnGUI()
+    // returns true when cheatmod shouldn't be doing anything, ie. during main menu, loading etc.
+    public bool CheatModBlocked()
     {
-        if (!this.modShow)
-            return;
-        this.UITitle();
-        this.UIPages();
+        // good enough
+        return !gamemanager.ins.HotkeysEnabled();
     }
 
-    public void InitSize()
+    // returns true when scene can be refreshed
+    // scenes that shouldn't be refreshed are ones which turn off after refresh ie. sex minigame, dialogue, selecting interests etc.
+    public bool CanRefreshScene()
     {
-        Mods.PageTotal = 2;
-        Mods.PageLines = new int[Mods.PageTotal];
-        Mods.ModWindowWidht = 750f;//(float)(Screen.width / 4) + 100f;
-        Mods.ModWindowPos = new Rect(10f, 10f, Mods.ModWindowWidht, 10f);
-        Mods.PageCurrent = 0;
-        Mods.PageLines[0] = 0;
-        Mods.PageLines[1] = 0;
+        List<string> blockingLocations = (List<string>)InvokePrivateMember(SceneController.ins, "exclusionScenes");
+        return !UI_Manager.ins.SexActive && !blockingLocations.Contains(SceneManager.GetActiveScene().name);
     }
 
-    public void UITitle() => GUI.Box(Draw.Window(), Info.Metadata.Version + " - " + Info.Metadata.Name, Draw.BgStyle);
-
-    public void PageChange(int page)
+    public object InvokePrivateMember(object o, string methodName, params object[] parameters)
     {
-        if (Mods.PageCurrent + page > Mods.PageTotal - 1)
-            return;
-        if (Mods.PageCurrent + page <= 0)
-            Mods.PageCurrent = 0;
-        else
-            Mods.PageCurrent += page;
+        return o.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField | BindingFlags.GetProperty, null, o, parameters);
     }
 
-    private String GetCheatPageDescription(int page)
+    public static bool IsCalledFromCheatMod(params string[] methodNames)
     {
-        if (page == 0)
-            return "(Player and global cheats) (" + page1Key.Value + ")";
-        if (page == 1)
-            return "(Individual character cheats) (" + page2Key.Value + ")";
-        return "";
+        // Check if any method in callstack belongs to cheatmod
+        return Array.Exists(new StackTrace().GetFrames(), frame => frame.GetMethod().DeclaringType == typeof(Mods) && methodNames.Contains(frame.GetMethod().Name));
     }
 
-    public void gainXp(Skill skill, int num)
+    internal class GamePatches
     {
-        if (skill.NotCapped())
+        [HarmonyPatch(typeof(player), nameof(player.GetInventoryBonus))]
+        class PlayerInventoryLimit
         {
-            if (skill.gainXP(num))
-            {
-                skill.ProcessRankUP();
-            }
+            // 50 is baseline limit, this gets added to it (just for a nicer number)
+            static void Postfix(ref int __result) => __result = ModConfig.Instance.IsToggleInfiniteTopics() ? 99999 - 50 : __result;
+        }
 
-            gamemanager.ins.queue.EnqueueAction(player.ins.Sendmessage("+ " + num + " " + skill.Moniker + " XP"));
+        [HarmonyPatch]
+        class XpMultiplierNPC
+        {
+            static IEnumerable<MethodBase> TargetMethods() =>
+            [
+                AccessTools.Method(typeof(character_Script), nameof(character_Script.gainPreference), [typeof(tags), typeof(int), typeof(bool)]),
+                AccessTools.Method(typeof(character_Script), nameof(character_Script.gainPreferenceSilent), [typeof(tags), typeof(int), typeof(bool)]),
+            ];
+            static void Prefix(ref int num) => num = Mods.Instance.ExperienceGainMod(num, ModConfig.Instance.GetNpcXpMultiplier());
+        }
+
+        [HarmonyPatch]
+        class XpMultiplierPlayer
+        {
+            static IEnumerable<MethodBase> TargetMethods() =>
+            [
+                AccessTools.Method(typeof(PlayerSkills), nameof(PlayerSkills.GainXP), [typeof(Skill), typeof(int), typeof(bool)]),
+                AccessTools.Method(typeof(PlayerSkills), nameof(PlayerSkills.gainPassiveXP), [typeof(Skill), typeof(int)]),
+            ];
+            static void Prefix(ref int amount) => amount = Mods.Instance.ExperienceGainMod(amount, ModConfig.Instance.GetPlayerXpMultiplier());
         }
     }
 
-    public void UIPages()
+    [HarmonyPatch]
+    internal class SkipMethodPatches
     {
+        // skip these method invocations, if called from cheatmod
+        static IEnumerable<MethodBase> TargetMethods() =>
+        [
+            AccessTools.Method(typeof(player), nameof(player.setDailyInvestmentGrowth)),
+            AccessTools.Method(typeof(player), nameof(player.checkRep)),
+            AccessTools.Method(typeof(player), nameof(player.updateLifeStyleCDs)),
+            AccessTools.Method(typeof(player), nameof(player.processDailyFollowers)),
+            AccessTools.Method(typeof(player), nameof(player.resetBonusAPP)),
+            AccessTools.Method(typeof(player), nameof(player.gainPassiveXP)),
+            AccessTools.Method(typeof(location), "checkUpgrades"),
+            AccessTools.Method(typeof(location), "degradeLocation"),
+            AccessTools.Method(typeof(CoroutineQueue), nameof(CoroutineQueue.EnqueueAction)),
+        ];
 
-        if (GUI.Button(Draw.BtnPagePrevious(1), "<<", Draw.BtnStyle))
-            this.PageChange(-1);
-        if (GUI.Button(Draw.BtnPageNext(1), ">>", Draw.BtnStyle))
-            this.PageChange(1);
-        GUI.Label(Draw.BtnPage(1), "PAGE " + (Mods.PageCurrent+1).ToString() + " " + GetCheatPageDescription(Mods.PageCurrent), Draw.BtnStyle);
-        if (Mods.PageCurrent == 0)
-        {
-            int btnRow = 1;
-
-            GUI.Label(Draw.LabelShorter(++btnRow), "Money (Current: " + player.ins.money + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2Shorter(btnRow), "-100", Draw.BtnStyle))
-                this.AddMoneyToPlayer(-100);
-            if (GUI.Button(Draw.BtnLeft1Shorter(btnRow), "+100", Draw.BtnStyle))
-                this.AddMoneyToPlayer(100);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "+10000", Draw.BtnStyle))
-                this.AddMoneyToPlayer(10000);
-
-            if (GUI.Button(Draw.LabelThirdLeft(++btnRow), "Add charm", Draw.BtnStyle))
-                player.ins.advCharm();
-            if (GUI.Button(Draw.LabelThirdCenter(btnRow), "Add physique", Draw.BtnStyle))
-                player.ins.advPhysique();
-            if (GUI.Button(Draw.LabelThirdRight(btnRow), "Add smarts", Draw.BtnStyle))
-                player.ins.advSmarts();
-
-            playerSkillFilter = Draw.TextFieldShort(++btnRow, playerSkillFilter, Draw.BtnStyle);
-            List<Skill> filteredPlayerSkills = player.ins.playerSkills.Skills.FindAll(s => s.Moniker.ToLower().Contains(playerSkillFilter.ToLower()));
-            this.playerSkillSelected = Mathf.Clamp(this.playerSkillSelected, 0, filteredPlayerSkills.Count - 1);
-            GUI.Label(Draw.HalfLaberlShorter(btnRow), "Player skill xp: " + (filteredPlayerSkills.IsNullOrEmpty() ? "NaN" : filteredPlayerSkills[this.playerSkillSelected].Moniker) + " (Current: " + (filteredPlayerSkills.IsNullOrEmpty() ? "NaN" : filteredPlayerSkills[this.playerSkillSelected].XP.ToString()) + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft1Shorter(btnRow), "<<", Draw.BtnStyle))
-                this.playerSkillSelected = Mathf.Clamp(this.playerSkillSelected - 1, 0, filteredPlayerSkills.Count - 1);
-            if (GUI.Button(Draw.BtnLeft2Shorter(btnRow), ">>", Draw.BtnStyle))
-                this.playerSkillSelected = Mathf.Clamp(this.playerSkillSelected + 1, 0, filteredPlayerSkills.Count - 1);
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+50", Draw.BtnStyle) && !filteredPlayerSkills.IsNullOrEmpty())
-                player.ins.playerSkills.gainPassiveXP(filteredPlayerSkills[this.playerSkillSelected], 50);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Add all player skills exp", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "+100", Draw.BtnStyle))
-                this.AddSecondarySkills();
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Max all other character skills and stats (" + maxCharactersKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "Max", Draw.BtnStyle))
-            {
-                this.MaxCharactersExp();
-                this.SetCharacterValues(100);
-            }
-
-            topicsFilter = Draw.TextField(++btnRow, topicsFilter, Draw.BtnStyle);
-            List<topics> filteredSkills = Inventory.ins.Master_TopicList.FindAll(t => t.Name.ToLower().Contains(topicsFilter.ToLower()));
-            this.topicSelected = Mathf.Clamp(this.topicSelected, 0, filteredSkills.Count - 1);
-            if (GUI.Button(Draw.HalfLabelRight(btnRow), "Click: " + (filteredSkills.IsNullOrEmpty() ? "NaN" : filteredSkills[this.topicSelected].Name), Draw.BtnStyle) && !filteredSkills.IsNullOrEmpty())
-                player.ins.gainItem(filteredSkills[this.topicSelected]);
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "<<", Draw.BtnStyle))
-                this.topicSelected = Mathf.Clamp(this.topicSelected - 1, 0, filteredSkills.Count - 1);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), ">>", Draw.BtnStyle))
-                this.topicSelected = Mathf.Clamp(this.topicSelected + 1, 0, filteredSkills.Count - 1);
-            GUI.Label(Draw.LabelFull(++btnRow), "Selected topic tags: " + (filteredSkills.IsNullOrEmpty() ? "NaN" : PrintTags(filteredSkills[this.topicSelected].associatedTags)), Draw.BtnStyle);
-
-
-            tagsFilter = Draw.TextField(++btnRow, tagsFilter, Draw.BtnStyle);
-            List<dictionary_Tag> filteredTags = Inventory.ins.TagsList.FindAll(t => t.associated_TAG.name.ToLower().Contains(tagsFilter.ToLower()));
-            this.tagSelected = Mathf.Clamp(this.tagSelected, 0, filteredTags.Count - 1);
-            if (GUI.Button(Draw.HalfLabelRight(btnRow), "Click: " + (filteredTags.IsNullOrEmpty() ? "NaN" : filteredTags[this.tagSelected].associated_TAG.name), Draw.BtnStyle) && !filteredTags.IsNullOrEmpty())
-                GetRandomTopicWithTag(filteredTags[this.tagSelected]);
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "<<", Draw.BtnStyle))
-                this.tagSelected = Mathf.Clamp(this.tagSelected - 1, 0, filteredTags.Count - 1);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), ">>", Draw.BtnStyle))
-                this.tagSelected = Mathf.Clamp(this.tagSelected + 1, 0, filteredTags.Count - 1);
-
-            GUI.Label(Draw.LabelShorter(++btnRow), "Change hours (-1h = " + timeMinusKey.Value + ", +1h = " + timePlusKey.Value + ", +24h = " + skip24HoursKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2Shorter(btnRow), "-", Draw.BtnStyle))
-                this.SkipHours(-1);
-            if (GUI.Button(Draw.BtnLeft1Shorter(btnRow), "+", Draw.BtnStyle))
-                this.SkipHours(1);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "+24h", Draw.BtnStyle))
-                this.SkipHours(24);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Room cleanliness (Current: " + (gamemanager.ins.getCurrentLocation() == null || !gamemanager.ins.getCurrentLocation().cleanable ? "NaN" : (100 - gamemanager.ins.getCurrentLocation().dirtyness).ToString()) + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-20", Draw.BtnStyle))
-                if (this.AddRoomCleanliness(gamemanager.ins.getCurrentLocation(), -20) && toggleSkipTimeReloadLocation.Value)
-                    SkipHours(0);
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+20", Draw.BtnStyle))
-                if (this.AddRoomCleanliness(gamemanager.ins.getCurrentLocation(), 20) && toggleSkipTimeReloadLocation.Value)
-                    SkipHours(0);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Time multiplier (Hold " + fastForwardKey.Value + " for x5): x" + this.timeMultiplier.Value.ToString(), Draw.BtnStyle);
-            this.timeMultiplier.Value = (int) Draw.Slider(btnRow, timeMultiplier.Value, 1, 10);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Player xp multiplier: x" + this.playerXpMultiplier.Value.ToString(), Draw.BtnStyle);
-            this.playerXpMultiplier.Value = (int) Draw.Slider(btnRow, playerXpMultiplier.Value, 1, 30);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Other characters xp multiplier: x" + this.npcXpMultiplier.Value.ToString(), Draw.BtnStyle);
-            this.npcXpMultiplier.Value = (int)Draw.Slider(btnRow, npcXpMultiplier.Value, 1, 10);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Reset daily actions (" + resetActionsKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "Reset", Draw.BtnStyle))
-            {
-                this.ResetActions();
-                this.SkipHours(0);
-            }
-
-            if (GUI.Button(Draw.LabelFull(++btnRow), "Move to Your Room (bailout)", Draw.BtnStyle))
-                this.Bailout();
-
-            GUI.Label(Draw.LabelShortest(++btnRow), "Infinite stats (" + toggleInfStatsKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12Shortest(btnRow), this.toggleInfStats.Value.ToString(), Draw.BtnStyle))
-                this.ToggleInfiniteStats();
-
-            GUI.Label(Draw.LabelShortestRight(btnRow), "Infinite arousal (" + toggleInfArousalKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), this.toggleInfArousal.Value.ToString(), Draw.BtnStyle))
-                this.ToggleInfiniteArousal();
-
-            GUI.Label(Draw.LabelShortest(++btnRow), "Remove lifestyle cooldown (" + toggleResetLifestyleCDKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12Shortest(btnRow), this.toggleResetLifestyleCD.Value.ToString(), Draw.BtnStyle))
-                this.ToggleResetLifestyleCD();
-
-            GUI.Label(Draw.LabelShortestRight(btnRow), "Reload after time skip (" + toggleSkipTimeReloadLocationKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), this.toggleSkipTimeReloadLocation.Value.ToString(), Draw.BtnStyle))
-                this.ToggleSkipTimeReloadLocation();
-
-            GUI.Label(Draw.LabelShortest(++btnRow), "Infinite room cleanliness (" + toggleInfCleanlinessKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12Shortest(btnRow), this.toggleInfCleanliness.Value.ToString(), Draw.BtnStyle))
-                this.ToggleInfCleanliness();
-
-            GUI.Label(Draw.LabelShortestRight(btnRow), "Infinite topic limit (" + toggleInfTopicsKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), this.toggleInfTopics.Value.ToString(), Draw.BtnStyle))
-                this.ToggleInfTopics();
-
-            GUI.Label(Draw.LabelShortest(++btnRow), "Conversations keep perm. topics (" + toggleKeepPermTopicKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12Shortest(btnRow), this.toggleKeepPermTopic.Value.ToString(), Draw.BtnStyle))
-                this.ToggleKeepPermTopics();
-
-            GUI.Label(Draw.LabelShortestRight(btnRow), "Toggle infinite actions (" + toggleInfActionsKey.Value + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), this.toggleInfActions.Value.ToString(), Draw.BtnStyle))
-                this.ToggleInfActions();
-
-            GUI.Label(Draw.LabelShortest(++btnRow), "Hotbar checks can search inventory too", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12Shortest(btnRow), this.toggleHotbarChecksCanSearchInventory.Value.ToString(), Draw.BtnStyle))
-                this.ToggleHotbarChecksCanSearchInventory();
-
-            Mods.PageLines[0] = btnRow;
-        }
-        if (Mods.PageCurrent == 1)
-        {
-            int btnRow = 1;
-
-            character_Script character = characters.ins.Character_List[this.characterSelected];
-            Array ats = GetPossibleATs(character);
-
-            GUI.Label(Draw.BtnPage(++btnRow), "Character selected: " + character.name, Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnPagePrevious(btnRow), "<<", Draw.BtnStyle) && this.characterSelected > 0)
-            {
-                --this.characterSelected;
-                this.characterATSelected = -1;
-            }
-            if (GUI.Button(Draw.BtnPageNext(btnRow), ">>", Draw.BtnStyle) && this.characterSelected < characters.ins.Character_List.Count - 1)
-            {
-                ++this.characterSelected;
-                this.characterATSelected = -1;
-            }
-
-            if (GUI.Button(Draw.LabelFull(++btnRow), "Current AT: " + character.Archtype.name + ", click to load AT: " + GetATToLoad(ats, this.characterATSelected), Draw.BtnStyle) && GetATToLoad(ats, this.characterATSelected) != "none")
-            {
-                character.loadedAT = (GetATToLoad(ats, this.characterATSelected));
-                character.ArchetypeTransformation();
-                gamemanager.ins.updateCharacters();
-                SkipHours(0);
-            }
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "<<", Draw.BtnStyle) && ats != null)
-                this.characterATSelected = Mathf.Clamp(this.characterATSelected - 1, -1, ats.Length - 1);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), ">>", Draw.BtnStyle) && ats != null)
-                this.characterATSelected = Mathf.Clamp(this.characterATSelected + 1, -1, ats.Length - 1);
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Relationship (Current: " + character.relationship + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle))
-                character.relationship -= 10;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle))
-                character.relationship += 10;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Lust (Current: " + character.lust + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle))
-                character.lust -= 10;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle))
-                character.lust += 10;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Interest (Current: " + character.interest + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle))
-                character.interest -= 10;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle))
-                character.interest += 10;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Assertiveness (Current: " + character.dominance + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle))
-                character.dominance -= 10;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle))
-                character.dominance += 10;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Intoxication (Current: " + character.intoxication + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle))
-                character.intoxication -= 10;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle))
-                character.intoxication += 10;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Followers (Current: " + character.followers + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle))
-                character.followers -= 10;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle))
-                character.followers += 10;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "weekly_count (Current: " + character.weekly_count + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-1", Draw.BtnStyle))
-                character.weekly_count -= 1;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+1", Draw.BtnStyle))
-                character.weekly_count += 1;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "AT_Weekly_Counter1 (Current: " + character.AT_Weekly_Counter1 + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-1", Draw.BtnStyle))
-                character.AT_Weekly_Counter1 -= 1;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+1", Draw.BtnStyle))
-                character.AT_Weekly_Counter1 += 1;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "AT_Counter1 (Current: " + character.AT_Counter1 + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-1", Draw.BtnStyle))
-                character.AT_Counter1 -= 1;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+1", Draw.BtnStyle))
-                character.AT_Counter1 += 1;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "AT_Counter2 (Current: " + character.AT_Counter2 + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-1", Draw.BtnStyle))
-                character.AT_Counter2 -= 1;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+1", Draw.BtnStyle))
-                character.AT_Counter2 += 1;
-
-            GUI.Label(Draw.LabelFull(++btnRow), "AT_ChangeDelay (Current: " + character.AT_ChangeDelay + ")", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-1", Draw.BtnStyle))
-                character.AT_ChangeDelay -= 1;
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+1", Draw.BtnStyle))
-                character.AT_ChangeDelay += 1;
-
-            characterTopicFilter = Draw.TextFieldShort(++btnRow, characterTopicFilter, Draw.BtnStyle);
-            List<Skill> filteredTopics = player.ins.playerSkills.Skills.FindAll(s => s.Moniker.ToLower().Contains(characterTopicFilter.ToLower()));
-            this.characterSkillSelected = Mathf.Clamp(this.characterSkillSelected, 0, filteredTopics.Count - 1);
-            GUI.Label(Draw.HalfLaberlShorter(btnRow), "Topic: " + (filteredTopics.IsNullOrEmpty() ? "NaN" : filteredTopics[this.characterSkillSelected].Moniker) + " (Current: " + (filteredTopics.IsNullOrEmpty() ? "NaN" : character.preferences[filteredTopics[this.characterSkillSelected].Moniker].ToString()) + "%)", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnLeft1Shorter(btnRow), "<<", Draw.BtnStyle))
-                this.characterSkillSelected = Mathf.Clamp(this.characterSkillSelected - 1, 0, filteredTopics.Count - 1);
-            if (GUI.Button(Draw.BtnLeft2Shorter(btnRow), ">>", Draw.BtnStyle))
-                this.characterSkillSelected = Mathf.Clamp(this.characterSkillSelected + 1, 0, filteredTopics.Count - 1);
-            if (GUI.Button(Draw.BtnLeft2(btnRow), "-10", Draw.BtnStyle) && !filteredTopics.IsNullOrEmpty())
-                characters.ins.setPref(filteredTopics[this.characterSkillSelected].AssignedSO, character, Mathf.Clamp(character.preferences[filteredTopics[this.characterSkillSelected].Moniker] - 10, 0, 100));
-            if (GUI.Button(Draw.BtnLeft1(btnRow), "+10", Draw.BtnStyle) && !filteredTopics.IsNullOrEmpty())
-                characters.ins.setPref(filteredTopics[this.characterSkillSelected].AssignedSO, character, Mathf.Clamp(character.preferences[filteredTopics[this.characterSkillSelected].Moniker] + 10, 0, 100));
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Max All Skills", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "Max", Draw.BtnStyle))
-            {
-                foreach (Skill skill in player.ins.playerSkills.Skills)
-                {
-                    characters.ins.setPref(skill.AssignedSO, character, 100);
-                }
-            }
-
-            GUI.Label(Draw.LabelFull(++btnRow), "Reset all flags (massage, photoshoot, homework etc.)", Draw.BtnStyle);
-            if (GUI.Button(Draw.BtnRight12(btnRow), "Reset", Draw.BtnStyle))
-            {
-                character.DailyReset();
-                SkipHours(0);
-            }
-
-            Mods.PageLines[1] = btnRow;
-        }
-    }
-
-    public void Start()
-    {
-        Draw.InitStyles();
-        this.InitSize();
+        static bool Prefix() => !IsCalledFromCheatMod(nameof(ResetPlayerFlags), nameof(ResetLocation), nameof(AdvanceTime), nameof(MaxPlayerStats), nameof(MaxPlayerArousal));
     }
 
 }
