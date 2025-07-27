@@ -103,7 +103,7 @@ namespace LoserCheatMod
             if (flagsCounter > 1)
                 ModsGUI.NewLine(() => ResetFlags(character));
 
-            if (!character.characterUnlocked)
+            if (character.CharacterStats["Unlocked"].Value == 0)
                 ModsGUI.NewLine(() => UnlockCharacter(character));
         }
 
@@ -331,7 +331,7 @@ namespace LoserCheatMod
             GUILayout.Label("Unlock character", ModGUIStyles.LabelStyle);
             if (ModsGUI.CMButton("Unlock", ModGUIStyles.WideBtnStyle))
             {
-                character.characterUnlocked = true;
+                character.CharacterStats["Unlocked"].Value = 1;
                 Mods.Instance.RefreshScene();
             }
         }
