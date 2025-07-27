@@ -17,8 +17,8 @@ using UnityEngine.SceneManagement;
 public class Mods : BaseUnityPlugin
 {
     public const string NAMESPACE = "LoserCheatmod";
-    public const string TITLE = "noxtek & xeph555 cheats - lolkekeke2 edit";
-    public const string VERSION = "0.11.00";
+    public const string TITLE = "noxtek & xeph555 cheats - lolkekeke2 edit - selectivepaperclip edit";
+    public const string VERSION = "0.12.00";
 
     // entry point, called once from Unity due to BaseUnityPlugin (MonoBehaviour)
     // Mind the split between awake and start, awake should only handle instance creation and gameObject relevant stuff
