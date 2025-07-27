@@ -282,12 +282,12 @@ public class Mods : BaseUnityPlugin
         return false;
     }
 
-    public void CleanAllRooms() => gamemanager.ins.LM.locations.Values.ForEach(loc => AddRoomCleanliness(loc));
+    public void CleanAllRooms() => gamemanager.ins.LM.Locations.Values.ForEach(loc => AddRoomCleanliness(loc));
 
     public void ResetActions()
     {
         ResetPlayerFlags();
-        gamemanager.ins.LM.locations.Values.ForEach(loc => ResetLocation(loc));
+        gamemanager.ins.LM.Locations.Values.ForEach(loc => ResetLocation(loc));
         characters.ins.Character_List.ForEach(character => ResetNpcCharacterFlags(character));
     }
 
