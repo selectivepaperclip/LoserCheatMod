@@ -323,7 +323,6 @@ public class Mods : BaseUnityPlugin
     public void Bailout()
     {
         player.ins.setLocation(Location_list.Your_Room);
-        Scheduler.ins.Relocating = false;
         RefreshScene();
     }
 
