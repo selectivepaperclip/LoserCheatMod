@@ -77,7 +77,7 @@ namespace LoserCheatMod
                 ModsGUI.NewLine(() => EditATCounter1(character));
             if (character.Archtype.UseATCounter2)
                 ModsGUI.NewLine(() => EditATCounter2(character));
-            if (character.AT_ChangeDelay > 0)
+            if (character.CharacterStats["AT_ChangeDelay"].Value > 0)
                 ModsGUI.NewLine(() => EditATTransformationDelay(character));
 
             List<interestSO> filteredInterests = interests.ins.interestsSOList.FindAll(i => i.DisplayName.ToLower().Contains(characterInterestsFilter.ToLower()));
@@ -256,15 +256,15 @@ namespace LoserCheatMod
 
         private void EditATTransformationDelay(character_Script character)
         {
-            GUILayout.Label("AT transformation delay" + " (Current: " + character.AT_ChangeDelay + ")", ModGUIStyles.LabelStyle);
+            GUILayout.Label("AT transformation delay" + " (Current: " + character.CharacterStats["AT_ChangeDelay"].Value + ")", ModGUIStyles.LabelStyle);
             if (ModsGUI.CMButton("-1", ModGUIStyles.BtnStyle))
             {
-                character.AT_ChangeDelay -= 1;
-                if (character.AT_ChangeDelay <= 0)
+                character.CharacterStats["AT_ChangeDelay"].Value -= 1;
+                if (character.CharacterStats["AT_ChangeDelay"].Value <= 0)
                     Mods.Instance.RefreshScene();
             }
             if (ModsGUI.CMButton("+1", ModGUIStyles.BtnStyle))
-                character.AT_ChangeDelay += 1;
+                character.CharacterStats["AT_ChangeDelay"].Value += 1;
         }
 
         private void InterestSelector(List<interestSO> filteredInterests)
