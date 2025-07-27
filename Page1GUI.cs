@@ -15,7 +15,7 @@ namespace LoserCheatMod
         private int playerSkillSelected;
         private int topicSelected;
         private int tagSelected;
-        private int lockedLocationSelected;
+        // private int lockedLocationSelected;
 
         private string playerSkillFilter = "";
         private string topicsFilter = "";
@@ -61,9 +61,9 @@ namespace LoserCheatMod
             ModsGUI.NewLine(ResetDailyActions);
             ModsGUI.NewLine(MoveToPlayerRoom);
 
-            List<Location_Script> hiddenLocations = Mods.Instance.GetLockedLocations();
-            if (!hiddenLocations.IsNullOrEmpty())
-                ModsGUI.NewLine(() => UnlockLocations(hiddenLocations));
+            // List<Location_Script> hiddenLocations = Mods.Instance.GetLockedLocations();
+            // if (!hiddenLocations.IsNullOrEmpty())
+            //     ModsGUI.NewLine(() => UnlockLocations(hiddenLocations));
 
             ModsGUI.NewLine(ModsGUI.HalfWidth(InfiniteStatsToggle), ModsGUI.HalfWidth(InfiniteArousalToggle));
             ModsGUI.NewLine(ModsGUI.HalfWidth(LifestyleCDToggle), ModsGUI.HalfWidth(RoomCleanlinessToggle));
@@ -243,19 +243,19 @@ namespace LoserCheatMod
                 Mods.Instance.Bailout();
         }
 
-        private void UnlockLocations(List<Location_Script> hiddenLocations)
-        {
-            GUILayout.Label("Unlock location: " + (hiddenLocations.IsNullOrEmpty() ? "none" : hiddenLocations.ElementAt(lockedLocationSelected).LocaleName), ModGUIStyles.LabelStyle);
-            if (ModsGUI.CMButton("<<", ModGUIStyles.BtnStyle))
-                lockedLocationSelected = Mathf.Clamp(lockedLocationSelected - 1, 0, hiddenLocations.Count - 1);
-            if (ModsGUI.CMButton(">>", ModGUIStyles.BtnStyle))
-                lockedLocationSelected = Mathf.Clamp(lockedLocationSelected + 1, 0, hiddenLocations.Count - 1);
-            if (ModsGUI.CMButton("Unlock", ModGUIStyles.WideBtnStyle) && !hiddenLocations.IsNullOrEmpty())
-            {
-                Mods.Instance.UnlockLocation(hiddenLocations.ElementAt(lockedLocationSelected));
-                Mods.Instance.RefreshScene();
-            }
-        }
+        // private void UnlockLocations(List<Location_Script> hiddenLocations)
+        // {
+        //     GUILayout.Label("Unlock location: " + (hiddenLocations.IsNullOrEmpty() ? "none" : hiddenLocations.ElementAt(lockedLocationSelected).LocaleName), ModGUIStyles.LabelStyle);
+        //     if (ModsGUI.CMButton("<<", ModGUIStyles.BtnStyle))
+        //         lockedLocationSelected = Mathf.Clamp(lockedLocationSelected - 1, 0, hiddenLocations.Count - 1);
+        //     if (ModsGUI.CMButton(">>", ModGUIStyles.BtnStyle))
+        //         lockedLocationSelected = Mathf.Clamp(lockedLocationSelected + 1, 0, hiddenLocations.Count - 1);
+        //     if (ModsGUI.CMButton("Unlock", ModGUIStyles.WideBtnStyle) && !hiddenLocations.IsNullOrEmpty())
+        //     {
+        //         Mods.Instance.UnlockLocation(hiddenLocations.ElementAt(lockedLocationSelected));
+        //         Mods.Instance.RefreshScene();
+        //     }
+        // }
 
         private void ChangeTime()
         {

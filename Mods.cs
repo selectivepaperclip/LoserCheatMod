@@ -326,18 +326,18 @@ public class Mods : BaseUnityPlugin
         RefreshScene();
     }
 
-    public List<Location_Script> GetLockedLocations()
-    {
-        // filter out job locations
-        List<Location_Script> hiddenLocations = gamemanager.ins.LM.locations.Values.Where(l => l.hiddenLocation && !JobManager.ins.jobs.Select(j => j.AssignedLocation).Contains(l.assignedLocale)).ToList();
-        hiddenLocations.Sort((l1, l2) => l1.LocaleName.CompareTo(l2.LocaleName));
-        return hiddenLocations;
-    }
+    // public List<Location_Script> GetLockedLocations()
+    // {
+    //     // filter out job locations
+    //     List<Location_Script> hiddenLocations = gamemanager.ins.LM.locations.Values.Where(l => l.hiddenLocation && !JobManager.ins.jobs.Select(j => j.AssignedLocation).Contains(l.assignedLocale)).ToList();
+    //     hiddenLocations.Sort((l1, l2) => l1.LocaleName.CompareTo(l2.LocaleName));
+    //     return hiddenLocations;
+    // }
 
-    public void UnlockLocation(Location_Script loc)
-    {
-        gamemanager.ins.unHideLocation(loc.assignedLocale);
-    }
+    // public void UnlockLocation(Location_Script loc)
+    // {
+    //     gamemanager.ins.unHideLocation(loc.assignedLocale);
+    // }
 
     public void RefreshButtons(bool fadeToBlack = false)
     {
