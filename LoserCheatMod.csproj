@@ -4,7 +4,7 @@
     <TargetFramework>net471</TargetFramework>
     <AssemblyName>cheatmod.loser</AssemblyName>
     <Description>noxtek &amp; xeph555 cheats - lolkekeke2 edit - selectivepaperclip edit</Description>
-    <Version>0.10.02.1</Version>
+    <Version>0.12</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -27,6 +27,7 @@
   <ItemGroup>
   <Reference Include="Sirenix">
     <HintPath>deps\Sirenix.Serialization.dll</HintPath>
+    <HintPath>deps\Sirenix.Utilities.dll</HintPath>
   </Reference>
   </ItemGroup>
   <ItemGroup>
