@@ -61,7 +61,7 @@ namespace LoserCheatMod
             ModsGUI.NewLine(ResetDailyActions);
             ModsGUI.NewLine(MoveToPlayerRoom);
 
-            List<location> hiddenLocations = Mods.Instance.GetLockedLocations();
+            List<Location_Script> hiddenLocations = Mods.Instance.GetLockedLocations();
             if (!hiddenLocations.IsNullOrEmpty())
                 ModsGUI.NewLine(() => UnlockLocations(hiddenLocations));
 
@@ -243,7 +243,7 @@ namespace LoserCheatMod
                 Mods.Instance.Bailout();
         }
 
-        private void UnlockLocations(List<location> hiddenLocations)
+        private void UnlockLocations(List<Location_Script> hiddenLocations)
         {
             GUILayout.Label("Unlock location: " + (hiddenLocations.IsNullOrEmpty() ? "none" : hiddenLocations.ElementAt(lockedLocationSelected).LocaleName), ModGUIStyles.LabelStyle);
             if (ModsGUI.CMButton("<<", ModGUIStyles.BtnStyle))

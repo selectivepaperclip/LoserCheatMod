@@ -272,7 +272,7 @@ public class Mods : BaseUnityPlugin
     // own method so that IsCalledFromCheatMod can be used
     private void AdvanceTime(int hourstoadd) => Scheduler.ins.advanceTime(hourstoadd);
 
-    public bool AddRoomCleanliness(location loc, int amt = 999)
+    public bool AddRoomCleanliness(Location_Script loc, int amt = 999)
     {
         if (loc != null && loc.cleanable)
         {
@@ -302,7 +302,7 @@ public class Mods : BaseUnityPlugin
         player.ins.setHasYardwork(Bool: false);
     }
 
-    public void ResetLocation(location loc)
+    public void ResetLocation(Location_Script loc)
     {
         loc.DailyReset();
         InvokePrivateMember(loc, "WeeklyReset");
@@ -327,15 +327,15 @@ public class Mods : BaseUnityPlugin
         RefreshScene();
     }
 
-    public List<location> GetLockedLocations()
+    public List<Location_Script> GetLockedLocations()
     {
         // filter out job locations
-        List<location> hiddenLocations = gamemanager.ins.LM.locations.Values.Where(l => l.hiddenLocation && !JobManager.ins.jobs.Select(j => j.AssignedLocation).Contains(l.assignedLocale)).ToList();
+        List<Location_Script> hiddenLocations = gamemanager.ins.LM.locations.Values.Where(l => l.hiddenLocation && !JobManager.ins.jobs.Select(j => j.AssignedLocation).Contains(l.assignedLocale)).ToList();
         hiddenLocations.Sort((l1, l2) => l1.LocaleName.CompareTo(l2.LocaleName));
         return hiddenLocations;
     }
 
-    public void UnlockLocation(location loc)
+    public void UnlockLocation(Location_Script loc)
     {
         gamemanager.ins.unHideLocation(loc.assignedLocale);
     }
@@ -421,8 +421,8 @@ public class Mods : BaseUnityPlugin
             AccessTools.Method(typeof(player), nameof(player.processDailyFollowers)),
             AccessTools.Method(typeof(player), nameof(player.resetBonusAPP)),
             AccessTools.Method(typeof(player), nameof(player.gainPassiveXP)),
-            AccessTools.Method(typeof(location), "checkUpgrades"),
-            AccessTools.Method(typeof(location), "degradeLocation"),
+            AccessTools.Method(typeof(Location_Script), "checkUpgrades"),
+            AccessTools.Method(typeof(Location_Script), "degradeLocation"),
             AccessTools.Method(typeof(CoroutineQueue), nameof(CoroutineQueue.EnqueueAction)),
         ];
 
