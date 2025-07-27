@@ -207,13 +207,13 @@ public class Mods : BaseUnityPlugin
 
     public void MaxCharacterStats(character_Script character, int value = 99999)
     {
-        AddCharacterStat(character, CharStatList.relationship, value, silent: true);
-        AddCharacterStat(character, CharStatList.lust, value, silent: true);
-        AddCharacterStat(character, CharStatList.interest, value, silent: true);
-        AddCharacterStat(character, CharStatList.intoxication, value, silent: true);
-        AddCharacterStat(character, CharStatList.followers, value, silent: true);
+        AddCharacterStat(character, CharStatList.Relationship, value, silent: true);
+        AddCharacterStat(character, CharStatList.Lust, value, silent: true);
+        AddCharacterStat(character, CharStatList.Interest, value, silent: true);
+        AddCharacterStat(character, CharStatList.Intoxication, value, silent: true);
+        AddCharacterStat(character, CharStatList.Followers, value, silent: true);
         // make a dominant character more dominant, and submissive more submissive. 0 is currently treated as submissive
-        AddCharacterStat(character, CharStatList.dominance, character.getStat(CharStatList.dominance) > 0 ? value : -value, silent: true);
+        AddCharacterStat(character, CharStatList.Assertiveness, character.getStat(CharStatList.Assertiveness) > 0 ? value : -value, silent: true);
     }
 
     public void TransformCharacter(character_Script character, string AT)

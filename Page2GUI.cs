@@ -62,13 +62,13 @@ namespace LoserCheatMod
             ModsGUI.NewLine(() => SelectCharacter(character));
             ModsGUI.NewLine(() => CharacterATSelector(character, possibleATs));
 
-            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.relationship, character));
-            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.lust, character));
-            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.interest, character));
-            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.dominance, character));
-            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.intoxication, character));
+            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Relationship, character));
+            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Lust, character));
+            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Interest, character));
+            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Assertiveness, character));
+            ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Intoxication, character));
             if (character.Archtype.showFollowers)
-                ModsGUI.NewLine(() => EditCharacterStat(CharStatList.followers, character));
+                ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Followers, character));
             ModsGUI.NewLine(() => MaxCharacterStats(character));
 
             if (WeeklyCountRelevant(character))
@@ -196,7 +196,7 @@ namespace LoserCheatMod
 
         private void MaxCharacterStats(character_Script character)
         {
-            GUILayout.Label(string.Format("Max {0}, {1}, {2}, {3}", CharStatList.relationship, CharStatList.interest, CharStatList.dominance, CharStatList.intoxication) + (character.Archtype.showFollowers ? ", " + CharStatList.followers : ""), ModGUIStyles.LabelStyle);
+            GUILayout.Label(string.Format("Max {0}, {1}, {2}, {3}", CharStatList.Relationship, CharStatList.Interest, CharStatList.Assertiveness, CharStatList.Intoxication) + (character.Archtype.showFollowers ? ", " + CharStatList.Followers : ""), ModGUIStyles.LabelStyle);
             if (ModsGUI.CMButton("Max", ModGUIStyles.BtnStyle))
             {
                 Mods.Instance.MaxCharacterStats(character);
