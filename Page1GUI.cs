@@ -51,7 +51,7 @@ namespace LoserCheatMod
             ModsGUI.NewLine(() => SelectedTopicTags(filteredSkills));
             ModsGUI.NewLine(SpawnTopicBySelectedTag);
 
-            if (gamemanager.ins.getCurrentLocation() != null && gamemanager.ins.getCurrentLocation().cleanable)
+            if (gamemanager.ins.getCurrentLocation() != null && gamemanager.ins.getCurrentLocation().LocationBools[Location_Bools.Cleanable])
                 ModsGUI.NewLine(RoomCleaning);
 
             ModsGUI.NewLine(ChangeTime);
@@ -270,7 +270,7 @@ namespace LoserCheatMod
 
         private void RoomCleaning()
         {
-            GUILayout.Label("Room cleanliness (Current: " + (gamemanager.ins.getCurrentLocation() == null || !gamemanager.ins.getCurrentLocation().cleanable ? "none" : (100 - gamemanager.ins.getCurrentLocation().dirtyness).ToString()) + ")", ModGUIStyles.LabelStyle);
+            GUILayout.Label("Room cleanliness (Current: " + (gamemanager.ins.getCurrentLocation() == null || !gamemanager.ins.getCurrentLocation().LocationBools[Location_Bools.Cleanable] ? "none" : (100 - gamemanager.ins.getCurrentLocation().dirtyness).ToString()) + ")", ModGUIStyles.LabelStyle);
             if (ModsGUI.CMButton("-20", ModGUIStyles.BtnStyle))
                 if (Mods.Instance.AddRoomCleanliness(gamemanager.ins.getCurrentLocation(), -20))
                     Mods.Instance.RefreshScene();

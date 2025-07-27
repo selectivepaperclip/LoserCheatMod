@@ -274,7 +274,7 @@ public class Mods : BaseUnityPlugin
 
     public bool AddRoomCleanliness(Location_Script loc, int amt = 999)
     {
-        if (loc != null && loc.cleanable)
+        if (loc != null && loc.LocationBools[Location_Bools.Cleanable])
         {
             loc.clean(amt);
             return true;
