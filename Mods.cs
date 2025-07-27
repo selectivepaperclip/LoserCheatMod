@@ -185,7 +185,7 @@ public class Mods : BaseUnityPlugin
     public void SetCharacterFlag(character_Script character, CharFlagList flag, bool value, bool silent = false)
     {
         // massaged flag doesnt play nice with CSM.modify()
-        if (CharFlagList.massaged == flag && character.massaged && !value)
+        if (CharFlagList.Massaged == flag && character.massaged && !value)
         {
             character.massaged = value;
         }
@@ -317,7 +317,7 @@ public class Mods : BaseUnityPlugin
             SetCharacterFlag(character, flag, false, silent: true);
     }
 
-    public List<CharFlagList> GetRelevantCharacterFlags() => [CharFlagList.hasModeled, CharFlagList.massaged, CharFlagList.hadSex, CharFlagList.dailyFlag1, CharFlagList.dailyFlag2, CharFlagList.Invited];
+    public List<CharFlagList> GetRelevantCharacterFlags() => [CharFlagList.Modeled, CharFlagList.Massaged, CharFlagList.HadSex, CharFlagList.AT_Flag1Daily, CharFlagList.AT_Flag2Daily, CharFlagList.Invited];
 
     // sometimes, due to bugs in the game, a scene might get stuck. added this as an emergency escape to player room
     public void Bailout()
