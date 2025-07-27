@@ -162,24 +162,20 @@ public class Mods : BaseUnityPlugin
 
     public void AddCharacterStat(character_Script character, CharStatList stat, int amount = 0, tags tag = null, interestSO interest = null, bool silent = false)
     {
-        CharacterStatModifications CSM = new()
-        {
-            character = character.Assigned,
-            Stat = stat,
-            Amount = amount
-        };
-        if (interest != null)
-            CSM._String = interest.Moniker;
         if (tag != null)
-            CSM.tag = tag;
+        {
+            character.gainPreference(tag, amount, false);
+            return;
+        }
 
-        if (silent)
-            CSM.modifySilent();
-        else
-            CSM.modify();
+        if (interest != null)
+        {
+            characters.ins.changeStat(stat, character.Assigned, amount, interest.Moniker);
+            return;
+        }
 
-        if (CharStatList.interest1 == CSM.Stat || CharStatList.interest2 == CSM.Stat)
-            character.updateIntrestedTags();
+        characters.ins.changeStat(stat, character.Assigned, amount, "");
+        return;
     }
 
     public void SetCharacterFlag(character_Script character, CharFlagList flag, bool value, bool silent = false)
