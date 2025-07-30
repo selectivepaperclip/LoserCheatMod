@@ -17,7 +17,7 @@ using UnityEngine.SceneManagement;
 public class Mods : BaseUnityPlugin
 {
     public const string NAMESPACE = "LoserCheatmod";
-    public const string TITLE = "noxtek & xeph555 cheats - lolkekeke2 edit - selectivepaperclip 2025-07-27.2";
+    public const string TITLE = "noxtek & xeph555 cheats - lolkekeke2 edit - selectivepaperclip 2025-07-30";
     public const string VERSION = "0.12.00";
 
     // entry point, called once from Unity due to BaseUnityPlugin (MonoBehaviour)
