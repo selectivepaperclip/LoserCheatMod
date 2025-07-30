@@ -32,18 +32,85 @@ namespace LoserCheatMod
         }
     }
 
-    [HarmonyPatch(typeof(Inventory))]
-    [HarmonyPatch(nameof(Inventory.hasTopicInBarWithTag))]
-    class hasTopicInBarWithTag
+    [HarmonyPatch(typeof(Reqs.topicReq), "processByTag")]
+    class processByTag
     {
-        static void Postfix(Inventory __instance, tags tag, ref bool __result)
+        static void Postfix(Reqs.topicReq __instance, Inventory inv, Reqs.requirements reqs, ref bool __result)
         {
-            if (__result) {
+            if (__result)
+            {
+                return;
+            }
+
+            if (ModConfig.Instance.IsToggleHotbarChecksCanSearchInventory() && !__instance.invert)
+            {
+                __result = InventoryHelperMethods._hasOwnedTopicByTag(inv, __instance.tag);
+            }
+        }
+
+    }
+
+    // hasHotbarTopicWithTag and hasItembarTopicWithTag currently return an int instead of a bool,
+    // with the intent of destroying whatever they find afterward. The patched versions have to return
+    // *some* non-neg1 int to be considered truthy, so I'm returning -2 and attempting to stop
+    // any consequence of downstream code blowing up using that value in methods such as
+    // removeTopicFromBarByTags by stubbing those methods too (in this case, to return false)
+    // This has the consequence that more to
+    [HarmonyPatch(typeof(Inventory))]
+    [HarmonyPatch(nameof(Inventory.hasHotbarTopicWithTag))]
+    class hasHotbarTopicWithTag
+    {
+        static void Postfix(Inventory __instance, tags tag, ref int __result)
+        {
+            if (__result != -1) {
                 return;
             }
             if (ModConfig.Instance.IsToggleHotbarChecksCanSearchInventory()) {
-                __result = InventoryHelperMethods._hasOwnedTopicByTag(__instance, tag);
+                __result = InventoryHelperMethods._hasOwnedTopicByTag(__instance, tag) ? -2 : -1;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(Inventory))]
+    [HarmonyPatch(nameof(Inventory.hasItembarTopicWithTag))]
+    class hasItembarTopicWithTag
+    {
+        static void Postfix(Inventory __instance, tags tag, ref int __result)
+        {
+            if (__result != -1) {
+                return;
+            }
+            if (ModConfig.Instance.IsToggleHotbarChecksCanSearchInventory()) {
+                __result = InventoryHelperMethods._hasOwnedTopicByTag(__instance, tag) ? -2 : -1;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Inventory))]
+    [HarmonyPatch(nameof(Inventory.removeTopicFromBarByTags))]
+    class removeTopicFromBarByTags
+    {
+        static bool Prefix(List<tags> _tags, topics.InventoryModReason Reason)
+        {
+            if (ModConfig.Instance.IsToggleHotbarChecksCanSearchInventory())
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Inventory))]
+    [HarmonyPatch(nameof(Inventory.removeTopicFromBarByTag))]
+    class removeTopicFromBarByTag
+    {
+        static bool Prefix(tags tag, topics.InventoryModReason Reason)
+        {
+            if (ModConfig.Instance.IsToggleHotbarChecksCanSearchInventory())
+            {
+                return false;
+            }
+            return true;
         }
     }
 

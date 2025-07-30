@@ -37,6 +37,11 @@ namespace LoserCheatMod
         public int GetTimeMultiplierMinValue() => GetConfigMinValue(GetConfigEntry("TimeMultiplier", multiplierConfigs));
         public int GetTimeMultiplierMaxValue() => GetConfigMaxValue(GetConfigEntry("TimeMultiplier", multiplierConfigs));
 
+        public int SetSpecifiedHourForSkipping(int specifiedHour) => GetConfigEntry("SpecifiedHourForSkipping", multiplierConfigs).Value = specifiedHour;
+        public int GetSpecifiedHourForSkipping() => GetConfigEntry("SpecifiedHourForSkipping", multiplierConfigs).Value;
+        public int GetSpecifiedHourForSkippingMinValue() => GetConfigMinValue(GetConfigEntry("SpecifiedHourForSkipping", multiplierConfigs));
+        public int GetSpecifiedHourForSkippingMaxValue() => GetConfigMaxValue(GetConfigEntry("SpecifiedHourForSkipping", multiplierConfigs));
+
         public KeyCode GetToggleInfiniteStatsKey() => GetConfigEntry("ToggleInfiniteStatsKey", keyConfigs).Value;
         public KeyCode GetToggleInfiniteArousalKey() => GetConfigEntry("ToggleInfiniteArousalKey", keyConfigs).Value;
         public KeyCode GetToggleResetLifestyleCDKey() => GetConfigEntry("ToggleResetLifestyleCDKey", keyConfigs).Value;
@@ -72,6 +77,8 @@ namespace LoserCheatMod
         public KeyCode GetTimeMinusKey() => GetConfigEntry("TimeMinusKey", keyConfigs).Value;
         public KeyCode GetTimePlusKey() => GetConfigEntry("TimePlusKey", keyConfigs).Value;
         public KeyCode GetSkip24HoursKey() => GetConfigEntry("Skip24HoursKey", keyConfigs).Value;
+        public KeyCode GetSkipToNextSpecifiedHourKey() => GetConfigEntry("SkipToNextSpecifiedHourKey", keyConfigs).Value;
+
 
         public int GetConfigMinValue(ConfigEntry<int> configEntry) => ((AcceptableValueRange<int>)configEntry.Description.AcceptableValues).MinValue;
         public int GetConfigMaxValue(ConfigEntry<int> configEntry) => ((AcceptableValueRange<int>)configEntry.Description.AcceptableValues).MaxValue;
@@ -107,6 +114,7 @@ namespace LoserCheatMod
                 config.Bind("Key", "TimeMinusKey", KeyCode.Alpha1, "Moves time back 1 hour. Can go backwards in days"),
                 config.Bind("Key", "TimePlusKey", KeyCode.Alpha2, "Moves time forward 1 hour. If past midnight, rolls over to next day"),
                 config.Bind("Key", "Skip24HoursKey", KeyCode.Alpha3, "Skips 24 hours"),
+                config.Bind("Key", "SkipToNextSpecifiedHourKey", KeyCode.Alpha4, "Skips to next specific hour"),
                 config.Bind("Key", "ResetActionsKey", KeyCode.R, "Resets actions like watching TV or working"),
                 config.Bind("Key", "ToggleInfiniteStatsKey", KeyCode.F2, "Shortcut key for ToggleInfiniteStats"),
                 config.Bind("Key", "ToggleInfiniteArousalKey", KeyCode.F3, "Shortcut key for ToggleInfiniteArousal"),
@@ -118,6 +126,7 @@ namespace LoserCheatMod
 
             multiplierConfigs = [
                 config.Bind("Time", "TimeMultiplier", 1, new ConfigDescription("Multiplier to time, speeds up scene transitions, attribute gains, topics/item received splash etc. Hold CTRL for 5 * multiplier", new AcceptableValueRange<int>(1, 10))),
+                config.Bind("Time", "SpecifiedHourForSkipping", 18, new ConfigDescription("Specified hour for 'skip to specified hour' feature", new AcceptableValueRange<int>(0, 23))),
                 config.Bind("Gameplay", "PlayerXpMultiplier", 1, new ConfigDescription("Multiplier to skill xp gained for player", new AcceptableValueRange<int>(1, 5))),
                 config.Bind("Gameplay", "NpcXpMultiplier", 1, new ConfigDescription("Multiplier to skill xp gained for NPCs", new AcceptableValueRange<int>(1, 5))),
             ];

@@ -21,7 +21,6 @@ namespace LoserCheatMod
         private string topicsFilter = "";
         private string tagsFilter = "";
 
-
         public void Awake()
         {
             Instance = this;
@@ -55,6 +54,7 @@ namespace LoserCheatMod
                 ModsGUI.NewLine(RoomCleaning);
 
             ModsGUI.NewLine(ChangeTime);
+            ModsGUI.NewLine(ChangeTime2);
             ModsGUI.NewLine(TimeMultiplierSelector);
             ModsGUI.NewLine(ModsGUI.HalfWidth(PlayerXpMultiplierSelector), ModsGUI.HalfWidth(NpcXpMultiplierSelector));
 
@@ -267,6 +267,22 @@ namespace LoserCheatMod
                 Mods.Instance.SkipHours(1);
             if (ModsGUI.CMButton("+24h (" + ModConfig.Instance.GetSkip24HoursKey() + ")", ModGUIStyles.WideBtnStyle))
                 Mods.Instance.SkipHours(24);
+        }
+
+        private void ChangeTime2()
+        {
+            GUILayout.Label("Skip to next specified hour: " + ModConfig.Instance.GetSpecifiedHourForSkipping(), ModGUIStyles.LabelStyle);
+            ModConfig.Instance.SetSpecifiedHourForSkipping(
+                (int)GUILayout.HorizontalSlider(
+                    ModConfig.Instance.GetSpecifiedHourForSkipping(),
+                    ModConfig.Instance.GetSpecifiedHourForSkippingMinValue(),
+                    ModConfig.Instance.GetSpecifiedHourForSkippingMaxValue(),
+                    ModGUIStyles.SliderStyle,
+                    ModGUIStyles.SliderThumbStyle)
+            );
+
+            if (ModsGUI.CMButton("+" + Mods.Instance.TimeTillNextSpecifiedHour() + "h (" + ModConfig.Instance.GetSkipToNextSpecifiedHourKey() + ")", ModGUIStyles.WideBtnStyle))
+                Mods.Instance.SkipToNextSpecifiedHour();
         }
 
         private void RoomCleaning()

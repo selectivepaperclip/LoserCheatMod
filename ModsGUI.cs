@@ -187,5 +187,16 @@ namespace LoserCheatMod
             return filter;
         }
 
+        public static string SpecifiedHourField(string text, Action OnClear = null)
+        {
+            GUILayout.Label("Hour:", ModGUIStyles.TextFieldLabelStyle);
+            string filter = GUILayout.TextField(text, ModGUIStyles.TextFieldInputStyle);
+            if (CMButton("X", ModGUIStyles.TextFieldClearBtn))
+            {
+                OnClear?.Invoke();
+                return "";
+            }
+            return filter;
+        }
     }
 }

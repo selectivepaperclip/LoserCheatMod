@@ -96,6 +96,8 @@ public class Mods : BaseUnityPlugin
             SkipHours(1);
         if (Input.GetKeyDown(ModConfig.Instance.GetSkip24HoursKey()))
             SkipHours(24);
+        if (Input.GetKeyDown(ModConfig.Instance.GetSkipToNextSpecifiedHourKey()))
+            SkipToNextSpecifiedHour();
 
         if (Input.GetKeyDown(ModConfig.Instance.GetResetActionsKey()))
         {
@@ -180,25 +182,7 @@ public class Mods : BaseUnityPlugin
 
     public void SetCharacterFlag(character_Script character, CharFlagList flag, bool value, bool silent = false)
     {
-        // massaged flag doesnt play nice with CSM.modify()
-        if (CharFlagList.Massaged == flag && character.CharacterStats["Massaged"].Value == 1 && !value)
-        {
-            character.CharacterStats["Massaged"].Value = value ? 1 : 0;
-        }
-        else
-        {
-            CharacterStatModifications CSM = new()
-            {
-                character = character.Assigned,
-                Flag = flag,
-                Toggle = value
-            };
-
-            if (silent)
-                CSM.modifySilent();
-            else
-                CSM.modify();
-        }
+        character.SetFlag(StatType_.Manual, flag.ToString(), value);
     }
 
     public void MaxCharacterStats(character_Script character, int value = 99999)
@@ -255,6 +239,21 @@ public class Mods : BaseUnityPlugin
         gamemanager.ins.StartEnumeration(SkipHoursDelayed(hourstoadd));
     }
 
+    public int TimeTillNextSpecifiedHour()
+    {
+        int specifiedHour = ModConfig.Instance.GetSpecifiedHourForSkipping();
+        if (specifiedHour > Scheduler.ins.time) {
+            return specifiedHour - Scheduler.ins.time;
+        } else {
+            return 24 - (Scheduler.ins.time - specifiedHour);
+        }
+    }
+
+    public void SkipToNextSpecifiedHour()
+    {
+        gamemanager.ins.StartEnumeration(SkipHoursDelayed(TimeTillNextSpecifiedHour()));
+    }
+
     // asked the dev, and this is how time passing should be handled:
     private IEnumerator SkipHoursDelayed(int hourstoadd)
     {
@@ -306,14 +305,18 @@ public class Mods : BaseUnityPlugin
 
     public void ResetNpcCharacterFlags(character_Script character)
     {
-        // character.dailyReset clears too many stats and flags, character.weeklyReset clears hacked profiles
-        //character.DailyReset();
-        //character.WeeklyReset();
         foreach (CharFlagList flag in GetRelevantCharacterFlags())
             SetCharacterFlag(character, flag, false, silent: true);
     }
 
-    public List<CharFlagList> GetRelevantCharacterFlags() => [CharFlagList.Modeled, CharFlagList.Massaged, CharFlagList.HadSex, CharFlagList.AT_Flag1Daily, CharFlagList.AT_Flag2Daily, CharFlagList.Invited];
+    public List<CharFlagList> GetRelevantCharacterFlags() => [
+        CharFlagList.Modeled,
+        CharFlagList.Massaged,
+        CharFlagList.HadSex,
+        CharFlagList.AT_Flag1Daily,
+        CharFlagList.AT_Flag2Daily,
+        CharFlagList.Invited
+    ];
 
     // sometimes, due to bugs in the game, a scene might get stuck. added this as an emergency escape to player room
     public void Bailout()
