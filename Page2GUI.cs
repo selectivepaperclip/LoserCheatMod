@@ -71,8 +71,6 @@ namespace LoserCheatMod
                 ModsGUI.NewLine(() => EditCharacterStat(CharStatList.Followers, character));
             ModsGUI.NewLine(() => MaxCharacterStats(character));
 
-            // if (WeeklyCountRelevant(character))
-            //     ModsGUI.NewLine(() => EditCharacterWeeklyCount(character));
             if (character.Archtype.UseATCounter1)
                 ModsGUI.NewLine(() => EditATCounter1(character));
             if (character.Archtype.UseATCounter2)
@@ -163,36 +161,6 @@ namespace LoserCheatMod
                 Mods.Instance.RefreshButtons();
             }
         }
-
-        // private void EditCharacterWeeklyCount(character_Script character)
-        // {
-        //     int step = 1;
-        //     GUILayout.Label(GetWeeklyCountLabel(character) + " (Current: " + character.getStat(CharStatList.weekly_count) + ")", ModGUIStyles.LabelStyle);
-        //     if (ModsGUI.CMButton("-" + step, ModGUIStyles.BtnStyle))
-        //     {
-        //         Mods.Instance.AddCharacterStat(character, CharStatList.weekly_count, -step);
-        //         Mods.Instance.RefreshButtons();
-        //     }
-        //     if (ModsGUI.CMButton("+" + step, ModGUIStyles.BtnStyle))
-        //     {
-        //         Mods.Instance.AddCharacterStat(character, CharStatList.weekly_count, step);
-        //         Mods.Instance.RefreshButtons();
-        //     }
-        // }
-
-        // // refactor this when character.Archtype.UseWeeklyATCounter and character.Archtype.UseWeeklyATCounterMessage are added
-        // private bool WeeklyCountRelevant(character_Script character)
-        // {
-        //     return CharacterList.Becky == character.Assigned;
-        // }
-
-        // private string GetWeeklyCountLabel(character_Script character)
-        // {
-        //     if (CharacterList.Becky == character.Assigned)
-        //         return "Homework";
-        //     return CharStatList.weekly_count.ToString();
-        // }
-
 
         private void MaxCharacterStats(character_Script character)
         {
