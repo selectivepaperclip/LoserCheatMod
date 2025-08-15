@@ -72,9 +72,9 @@ namespace LoserCheatMod
             ModsGUI.NewLine(() => MaxCharacterStats(character));
 
             if (character.Archtype.UseATCounter1)
-                ModsGUI.NewLine(() => EditATCounter1(character));
+                ModsGUI.NewLine(() => EditATStat(character, character.Archtype.ATStat1));
             if (character.Archtype.UseATCounter2)
-                ModsGUI.NewLine(() => EditATCounter2(character));
+                ModsGUI.NewLine(() => EditATStat(character, character.Archtype.ATStat2));
             if (character.CharacterStats["AT_ChangeDelay"].Value > 0)
                 ModsGUI.NewLine(() => EditATTransformationDelay(character));
 
@@ -172,52 +172,30 @@ namespace LoserCheatMod
             }
         }
 
-        private void EditATCounter1(character_Script character)
+        private void EditATStat(character_Script character, ArcheType.ATStat atStat)
         {
-            GUILayout.Label((character.Archtype.UseATCounter1 ? character.Archtype.ATCounter1Message : "AT_Counter1Manual") + " (Current: " + character.getStat(CharStatList.AT_Counter1Manual) + ")", ModGUIStyles.LabelStyle);
+            GUILayout.Label(
+                atStat.Stat.visualname + " (Current: " + atStat.getStat(character).ToString() + ")",
+                ModGUIStyles.LabelStyle
+            );
             if (ModsGUI.CMButton("-1", ModGUIStyles.BtnStyle))
             {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter1Manual, -1);
+                character.ModifyStats(StatType_.Manual, atStat.getKey(), -1);
                 Mods.Instance.RefreshButtons();
             }
             if (ModsGUI.CMButton("+1", ModGUIStyles.BtnStyle))
             {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter1Manual, 1);
+                character.ModifyStats(StatType_.Manual, atStat.getKey(), 1);
                 Mods.Instance.RefreshButtons();
             }
             if (ModsGUI.CMButton("-10", ModGUIStyles.BtnStyle))
             {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter1Manual, -10);
+                character.ModifyStats(StatType_.Manual, atStat.getKey(), -10);
                 Mods.Instance.RefreshButtons();
             }
             if (ModsGUI.CMButton("+10", ModGUIStyles.BtnStyle))
             {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter1Manual, 10);
-                Mods.Instance.RefreshButtons();
-            }
-        }
-
-        private void EditATCounter2(character_Script character)
-        {
-            GUILayout.Label((character.Archtype.UseATCounter2 ? character.Archtype.ATCounter2Message : "AT_Counter2Manual") + " (Current: " + character.getStat(CharStatList.AT_Counter2Manual) + ")", ModGUIStyles.LabelStyle);
-            if (ModsGUI.CMButton("-1", ModGUIStyles.BtnStyle))
-            {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter2Manual, -1);
-                Mods.Instance.RefreshButtons();
-            }
-            if (ModsGUI.CMButton("+1", ModGUIStyles.BtnStyle))
-            {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter2Manual, 1);
-                Mods.Instance.RefreshButtons();
-            }
-            if (ModsGUI.CMButton("-10", ModGUIStyles.BtnStyle))
-            {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter2Manual, -10);
-                Mods.Instance.RefreshButtons();
-            }
-            if (ModsGUI.CMButton("+10", ModGUIStyles.BtnStyle))
-            {
-                Mods.Instance.AddCharacterStat(character, CharStatList.AT_Counter2Manual, 10);
+                character.ModifyStats(StatType_.Manual, atStat.getKey(), 10);
                 Mods.Instance.RefreshButtons();
             }
         }
