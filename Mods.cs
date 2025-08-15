@@ -70,8 +70,6 @@ public class Mods : BaseUnityPlugin
             ResetLifestyleCD();
         if (ModConfig.Instance.IsToggleInfiniteCleanliness())
             CleanAllRooms();
-        if (ModConfig.Instance.IsToggleInfiniteActions())
-            ResetActions();
     }
 
     // handle all keypresses here
@@ -87,8 +85,6 @@ public class Mods : BaseUnityPlugin
             ModConfig.Instance.ToggleInfiniteCleanliness();
         if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteTopicsKey()))
             ModConfig.Instance.ToggleInfiniteTopics();
-        if (Input.GetKeyDown(ModConfig.Instance.GetToggleInfiniteActionsKey()))
-            ModConfig.Instance.ToggleInfiniteActions();
 
         if (Input.GetKeyDown(ModConfig.Instance.GetTimeMinusKey()))
             SkipHours(-1);

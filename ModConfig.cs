@@ -47,14 +47,12 @@ namespace LoserCheatMod
         public KeyCode GetToggleResetLifestyleCDKey() => GetConfigEntry("ToggleResetLifestyleCDKey", keyConfigs).Value;
         public KeyCode GetToggleInfiniteCleanlinessKey() => GetConfigEntry("ToggleInfiniteCleanlinessKey", keyConfigs).Value;
         public KeyCode GetToggleInfiniteTopicsKey() => GetConfigEntry("ToggleInfiniteTopicsKey", keyConfigs).Value;
-        public KeyCode GetToggleInfiniteActionsKey() => GetConfigEntry("ToggleInfiniteActionsKey", keyConfigs).Value;
 
         public void ToggleInfiniteStats() => GetConfigEntry("ToggleInfiniteStats", toggleConfigs).Value = !IsToggleInfiniteStats();
         public void ToggleInfiniteArousal() => GetConfigEntry("ToggleInfiniteArousal", toggleConfigs).Value = !IsToggleInfiniteArousal();
         public void ToggleResetLifestyleCD() => GetConfigEntry("ToggleResetLifestyleCD", toggleConfigs).Value = !IsToggleResetLifestyleCD();
         public void ToggleInfiniteCleanliness() => GetConfigEntry("ToggleInfiniteCleanliness", toggleConfigs).Value = !IsToggleInfiniteCleanliness();
         public void ToggleInfiniteTopics() => GetConfigEntry("ToggleInfiniteTopics", toggleConfigs).Value = !IsToggleInfiniteTopics();
-        public void ToggleInfiniteActions() => GetConfigEntry("ToggleInfiniteActions", toggleConfigs).Value = !IsToggleInfiniteActions();
         public void ToggleHotbarChecksCanSearchInventory() => GetConfigEntry("ToggleHotbarChecksCanSearchInventory", toggleConfigs).Value = !IsToggleHotbarChecksCanSearchInventory();
         public void ToggleShowOpenModHint() => GetConfigEntry("ToggleShowOpenModHint", toggleConfigs).Value = !IsToggleShowOpenModHint();
 
@@ -64,7 +62,6 @@ namespace LoserCheatMod
         public bool IsToggleResetLifestyleCD() => GetConfigEntry("ToggleResetLifestyleCD", toggleConfigs).Value;
         public bool IsToggleInfiniteCleanliness() => GetConfigEntry("ToggleInfiniteCleanliness", toggleConfigs).Value;
         public bool IsToggleInfiniteTopics() => GetConfigEntry("ToggleInfiniteTopics", toggleConfigs).Value;
-        public bool IsToggleInfiniteActions() => GetConfigEntry("ToggleInfiniteActions", toggleConfigs).Value;
         public bool IsToggleHotbarChecksCanSearchInventory() => GetConfigEntry("ToggleHotbarChecksCanSearchInventory", toggleConfigs).Value;
 
         public bool IsToggleShowOpenModHint() => GetConfigEntry("ToggleShowOpenModHint", toggleConfigs).Value;
@@ -98,7 +95,6 @@ namespace LoserCheatMod
                 config.Bind("Toggles", "ToggleResetLifestyleCD", false, "Removes the cooldown of changing lifestyles"),
                 config.Bind("Toggles", "ToggleInfiniteCleanliness", false, "Keeps all room at 100% clean"),
                 config.Bind("Toggles", "ToggleInfiniteTopics", false, "Sets the limit of topics in invetory to 99999"),
-                config.Bind("Toggles", "ToggleInfiniteActions", false, "Toggle if actions like watching TV, working, social media etc. should have no limits"),
                 config.Bind("Toggles", "ToggleHotbarChecksCanSearchInventory", false, "Toggle whether actions that require certain items/topics are allowed to search inventory (items/topics not in hotbar wont be consumed)"),
                 config.Bind("Toggles", "ToggleShowOpenModHint", true, "Toggle if 'press ShowModsKey to open' is displayed, when mod is closed"),
             ];
@@ -121,7 +117,6 @@ namespace LoserCheatMod
                 config.Bind("Key", "ToggleResetLifestyleCDKey", KeyCode.F4, "Shortcut key for ToggleResetLifestyleCD"),
                 config.Bind("Key", "ToggleInfiniteCleanlinessKey", KeyCode.F5, "Shortcut key for ToggleInfiniteCleanliness"),
                 config.Bind("Key", "ToggleInfiniteTopicsKey", KeyCode.F6, "Shortcut key for ToggleInfiniteTopics"),
-                config.Bind("Key", "ToggleInfiniteActionsKey", KeyCode.F7, "Shortcut key for ToggleInfiniteActions"),
             ];
 
             multiplierConfigs = [

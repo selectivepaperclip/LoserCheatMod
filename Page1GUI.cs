@@ -67,7 +67,7 @@ namespace LoserCheatMod
 
             ModsGUI.NewLine(ModsGUI.HalfWidth(InfiniteStatsToggle), ModsGUI.HalfWidth(InfiniteArousalToggle));
             ModsGUI.NewLine(ModsGUI.HalfWidth(LifestyleCDToggle), ModsGUI.HalfWidth(RoomCleanlinessToggle));
-            ModsGUI.NewLine(ModsGUI.HalfWidth(InfiniteTopicLimitToggle), ModsGUI.HalfWidth(InfiniteActionsToggle));
+            ModsGUI.NewLine(ModsGUI.HalfWidth(InfiniteTopicLimitToggle));
             ModsGUI.NewLine(HotbarChecksCanSearchInventoryToggle);
 
             ModsGUI.NewLine(ShowModHintToggle);
@@ -367,13 +367,6 @@ namespace LoserCheatMod
             GUILayout.Label("Infinite topic limit (" + ModConfig.Instance.GetToggleInfiniteTopicsKey() + ")", ModGUIStyles.LabelStyle);
             if (ModsGUI.CMButton(ModConfig.Instance.IsToggleInfiniteTopics().ToString(), ModGUIStyles.BtnStyle))
                 ModConfig.Instance.ToggleInfiniteTopics();
-        }
-
-        private void InfiniteActionsToggle()
-        {
-            GUILayout.Label("Toggle infinite actions (" + ModConfig.Instance.GetToggleInfiniteActionsKey() + ")", ModGUIStyles.LabelStyle);
-            if (ModsGUI.CMButton(ModConfig.Instance.IsToggleInfiniteActions().ToString(), ModGUIStyles.BtnStyle))
-                ModConfig.Instance.ToggleInfiniteActions();
         }
 
         private void HotbarChecksCanSearchInventoryToggle()
